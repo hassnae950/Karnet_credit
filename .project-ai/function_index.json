@@ -1,0 +1,146 @@
+[
+  {
+    "name": "GeneratedPluginRegistrant",
+    "type": "JAVA_Class",
+    "file": "android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java",
+    "start": 14,
+    "end": 34,
+    "params": []
+  },
+  {
+    "name": "registerWith",
+    "type": "JAVA_Function",
+    "file": "android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java",
+    "start": 17,
+    "end": 33,
+    "params": []
+  },
+  {
+    "name": "MainActivity",
+    "type": "KOTLIN_Entity",
+    "file": "android\\app\\src\\main\\kotlin\\com\\hassnae\\credit_karnet\\flutter_application_1\\MainActivity.kt",
+    "start": 4,
+    "end": 4,
+    "params": []
+  },
+  {
+    "name": "handle_new_rx_page",
+    "type": "PYTHON_Function",
+    "file": "ios\\Flutter\\ephemeral\\flutter_lldb_helper.py",
+    "start": 7,
+    "end": 22,
+    "params": []
+  },
+  {
+    "name": "__lldb_init_module",
+    "type": "PYTHON_Function",
+    "file": "ios\\Flutter\\ephemeral\\flutter_lldb_helper.py",
+    "start": 24,
+    "end": 32,
+    "params": []
+  },
+  {
+    "name": "didInitializeImplicitFlutterEngine",
+    "type": "SWIFT_Entity",
+    "file": "ios\\Runner\\AppDelegate.swift",
+    "start": 13,
+    "end": 13,
+    "params": []
+  },
+  {
+    "name": "SceneDelegate",
+    "type": "SWIFT_Entity",
+    "file": "ios\\Runner\\SceneDelegate.swift",
+    "start": 4,
+    "end": 4,
+    "params": []
+  },
+  {
+    "name": "RunnerTests",
+    "type": "SWIFT_Entity",
+    "file": "ios\\RunnerTests\\RunnerTests.swift",
+    "start": 5,
+    "end": 5,
+    "params": []
+  },
+  {
+    "name": "testExample",
+    "type": "SWIFT_Entity",
+    "file": "ios\\RunnerTests\\RunnerTests.swift",
+    "start": 7,
+    "end": 7,
+    "params": []
+  },
+  {
+    "name": "RegisterGeneratedPlugins",
+    "type": "SWIFT_Entity",
+    "file": "macos\\Flutter\\GeneratedPluginRegistrant.swift",
+    "start": 10,
+    "end": 10,
+    "params": []
+  },
+  {
+    "name": "AppDelegate",
+    "type": "SWIFT_Entity",
+    "file": "macos\\Runner\\AppDelegate.swift",
+    "start": 5,
+    "end": 5,
+    "params": []
+  },
+  {
+    "name": "MainFlutterWindow",
+    "type": "SWIFT_Entity",
+    "file": "macos\\Runner\\MainFlutterWindow.swift",
+    "start": 4,
+    "end": 4,
+    "params": []
+  },
+  {
+    "name": "RunnerTests",
+    "type": "SWIFT_Entity",
+    "file": "macos\\RunnerTests\\RunnerTests.swift",
+    "start": 5,
+    "end": 5,
+    "params": []
+  },
+  {
+    "name": "testExample",
+    "type": "SWIFT_Entity",
+    "file": "macos\\RunnerTests\\RunnerTests.swift",
+    "start": 7,
+    "end": 7,
+    "params": []
+  },
+  {
+    "name": "FlutterWindow",
+    "type": "C_Entity",
+    "file": "windows\\runner\\flutter_window.h",
+    "start": 12,
+    "end": 12,
+    "params": []
+  },
+  {
+    "name": "Win32Window",
+    "type": "C_Entity",
+    "file": "windows\\runner\\win32_window.h",
+    "start": 13,
+    "end": 13,
+    "params": []
+  },
+  {
+    "name": "Point",
+    "type": "C_Entity",
+    "file": "windows\\runner\\win32_window.h",
+    "start": 15,
+    "end": 15,
+    "params": []
+  },
+  {
+    "name": "Size",
+    "type": "C_Entity",
+    "file": "windows\\runner\\win32_window.h",
+    "start": 21,
+    "end": 21,
+    "params": []
+  }
+]
