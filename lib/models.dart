@@ -1,5 +1,33 @@
 import 'package:flutter/material.dart';
 
+class Category {
+  int? id;
+  String name;
+  String type;
+
+  Category({
+    this.id,
+    required this.name,
+    required this.type,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+    };
+  }
+
+  factory Category.fromMap(Map<String, dynamic> map) {
+    return Category(
+      id: map['id'],
+      name: map['name'],
+      type: map['type'],
+    );
+  }
+}
+
 class Client {
   int? id;
   String nom;
@@ -7,6 +35,10 @@ class Client {
   String? adresse;
   DateTime dateCreation;
   double solde;
+  String type;
+  int? categoryId;
+  String? company;
+  String? notes;
 
   Client({
     this.id,
@@ -15,6 +47,10 @@ class Client {
     this.adresse,
     required this.dateCreation,
     this.solde = 0,
+    required this.type,
+    this.categoryId,
+    this.company,
+    this.notes,
   });
 
   String get initiales {
@@ -31,6 +67,11 @@ class Client {
       'telephone': telephone,
       'adresse': adresse,
       'dateCreation': dateCreation.toIso8601String(),
+      'solde': solde,
+      'type': type,
+      'categoryId': categoryId,
+      'company': company,
+      'notes': notes,
     };
   }
 
@@ -41,6 +82,11 @@ class Client {
       telephone: map['telephone'],
       adresse: map['adresse'],
       dateCreation: DateTime.parse(map['dateCreation']),
+      solde: map['solde']?.toDouble() ?? 0,
+      type: map['type'] ?? 'CLIENT',
+      categoryId: map['categoryId'],
+      company: map['company'],
+      notes: map['notes'],
     );
   }
 }
@@ -52,6 +98,7 @@ class Credit {
   double montantRestant;
   DateTime dateCredit;
   String? description;
+  String? imagePath;  // حقل الصورة
 
   Credit({
     this.id,
@@ -60,6 +107,7 @@ class Credit {
     required this.montantRestant,
     required this.dateCredit,
     this.description,
+    this.imagePath,
   });
 
   bool get estSolde => montantRestant <= 0;
@@ -77,6 +125,7 @@ class Credit {
       'montantRestant': montantRestant,
       'dateCredit': dateCredit.toIso8601String(),
       'description': description,
+      'imagePath': imagePath,
     };
   }
 
@@ -84,10 +133,11 @@ class Credit {
     return Credit(
       id: map['id'],
       clientId: map['clientId'],
-      montantTotal: map['montantTotal'],
-      montantRestant: map['montantRestant'],
+      montantTotal: map['montantTotal']?.toDouble() ?? 0,
+      montantRestant: map['montantRestant']?.toDouble() ?? 0,
       dateCredit: DateTime.parse(map['dateCredit']),
       description: map['description'],
+      imagePath: map['imagePath'],
     );
   }
 }
@@ -98,6 +148,7 @@ class Paiement {
   double montant;
   DateTime datePaiement;
   String? note;
+  String? imagePath;  // حقل الصورة
 
   Paiement({
     this.id,
@@ -105,6 +156,7 @@ class Paiement {
     required this.montant,
     required this.datePaiement,
     this.note,
+    this.imagePath,
   });
 
   Map<String, dynamic> toMap() {
@@ -114,6 +166,7 @@ class Paiement {
       'montant': montant,
       'datePaiement': datePaiement.toIso8601String(),
       'note': note,
+      'imagePath': imagePath,
     };
   }
 
@@ -121,9 +174,10 @@ class Paiement {
     return Paiement(
       id: map['id'],
       creditId: map['creditId'],
-      montant: map['montant'],
+      montant: map['montant']?.toDouble() ?? 0,
       datePaiement: DateTime.parse(map['datePaiement']),
       note: map['note'],
+      imagePath: map['imagePath'],
     );
   }
 }
@@ -192,7 +246,7 @@ class Cheque {
       id: map['id'],
       creditId: map['creditId'],
       numero: map['numero'],
-      montant: map['montant'],
+      montant: map['montant']?.toDouble() ?? 0,
       dateEcheance: DateTime.parse(map['dateEcheance']),
       banque: map['banque'],
       imagePath: map['imagePath'],

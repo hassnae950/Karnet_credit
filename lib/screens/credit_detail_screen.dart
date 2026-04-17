@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../database_helper.dart';
 import '../models.dart';
@@ -146,6 +147,28 @@ class _CreditDetailScreenState extends State<CreditDetailScreen> {
             '${(widget.credit.pourcentagePaye * 100).toStringAsFixed(0)}% مدفوع',
             style: const TextStyle(color: Color(0xFF1B8A6B), fontFamily: 'Cairo'),
           ),
+          // إضافة الوصف إذا كان موجوداً
+          if (widget.credit.description != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F6FA),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                widget.credit.description!,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'Cairo',
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ],
+          // إضافة صورة الكريدي إذا كانت موجودة
+          _buildImageThumbnail(widget.credit.imagePath),
         ],
       ),
     );
@@ -159,35 +182,105 @@ class _CreditDetailScreenState extends State<CreditDetailScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Icon(Icons.arrow_upward, color: Color(0xFF388E3C), size: 20),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Text(
-                formatDate(p.datePaiement),
-                style: const TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Cairo'),
+              const Icon(Icons.arrow_upward, color: Color(0xFF388E3C), size: 20),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    formatDate(p.datePaiement),
+                    style: const TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Cairo'),
+                  ),
+                  if (p.note != null)
+                    Text(
+                      p.note!,
+                      style: const TextStyle(fontSize: 12, fontFamily: 'Cairo'),
+                    ),
+                ],
               ),
-              if (p.note != null)
-                Text(
-                  p.note!,
-                  style: const TextStyle(fontSize: 12, fontFamily: 'Cairo'),
+              const Spacer(),
+              Text(
+                formatMontant(p.montant),
+                style: const TextStyle(
+                  color: Color(0xFF388E3C),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  fontFamily: 'Cairo',
                 ),
+              ),
             ],
           ),
-          const Spacer(),
-          Text(
-            formatMontant(p.montant),
-            style: const TextStyle(
-              color: Color(0xFF388E3C),
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              fontFamily: 'Cairo',
-            ),
-          ),
+          // عرض الصورة المصغرة للدفعة إذا كانت موجودة
+          _buildImageThumbnail(p.imagePath),
         ],
+      ),
+    );
+  }
+
+  // دالة لعرض الصورة المصغرة
+  Widget _buildImageThumbnail(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) return const SizedBox.shrink();
+    
+    return GestureDetector(
+      onTap: () => _showFullImage(imagePath),
+      child: Container(
+        margin: const EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFF1B8A6B), width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(7),
+          child: Image.file(
+            File(imagePath),
+            height: 60,
+            width: 60,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // دالة لعرض الصورة بحجم كامل مع خاصية التكبير والتصغير
+  void _showFullImage(String imagePath) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: EdgeInsets.zero,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(ctx),
+          child: Stack(
+            children: [
+              InteractiveViewer(
+                panEnabled: true,
+                scaleEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Center(
+                  child: Image.file(
+                    File(imagePath),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 40,
+                right: 10,
+                child: IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -20,23 +20,48 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 5,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
   }
 
+  // دالة إنشاء الجداول (مرة واحدة فقط)
   Future<void> _createDB(Database db, int version) async {
+    // حذف الجداول القديمة إذا كانت موجودة
+    await db.execute('DROP TABLE IF EXISTS cheques');
+    await db.execute('DROP TABLE IF EXISTS paiements');
+    await db.execute('DROP TABLE IF EXISTS credits');
+    await db.execute('DROP TABLE IF EXISTS clients');
+    await db.execute('DROP TABLE IF EXISTS categories');
+    
+    // 1. جدول التصنيفات
+    await db.execute('''
+      CREATE TABLE categories(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL
+      )
+    ''');
+    
+    // 2. جدول العملاء/الموردين
     await db.execute('''
       CREATE TABLE clients(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nom TEXT NOT NULL,
         telephone TEXT,
         adresse TEXT,
-        dateCreation TEXT NOT NULL
+        dateCreation TEXT NOT NULL,
+        solde REAL DEFAULT 0,
+        type TEXT NOT NULL DEFAULT 'CLIENT',
+        categoryId INTEGER,
+        company TEXT,
+        notes TEXT,
+        FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE SET NULL
       )
     ''');
-
+    
+    // 3. جدول الكريديات (مع عمود الصورة)
     await db.execute('''
       CREATE TABLE credits(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,10 +70,12 @@ class DatabaseHelper {
         montantRestant REAL NOT NULL,
         dateCredit TEXT NOT NULL,
         description TEXT,
+        imagePath TEXT,
         FOREIGN KEY (clientId) REFERENCES clients (id) ON DELETE CASCADE
       )
     ''');
-
+    
+    // 4. جدول الدفعات (مع عمود الصورة)
     await db.execute('''
       CREATE TABLE paiements(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,10 +83,12 @@ class DatabaseHelper {
         montant REAL NOT NULL,
         datePaiement TEXT NOT NULL,
         note TEXT,
+        imagePath TEXT,
         FOREIGN KEY (creditId) REFERENCES credits (id) ON DELETE CASCADE
       )
     ''');
-
+    
+    // 5. جدول الشيكات
     await db.execute('''
       CREATE TABLE cheques(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,26 +105,78 @@ class DatabaseHelper {
     ''');
   }
 
+  // دالة تحديث قاعدة البيانات
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    print('Upgrading database from version $oldVersion to $newVersion');
+    
     if (oldVersion < 2) {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS cheques(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          creditId INTEGER NOT NULL,
-          numero TEXT NOT NULL,
-          montant REAL NOT NULL,
-          dateEcheance TEXT NOT NULL,
-          banque TEXT,
-          imagePath TEXT,
-          statut TEXT DEFAULT 'EN_ATTENTE',
-          dateCreation TEXT NOT NULL,
-          FOREIGN KEY (creditId) REFERENCES credits (id) ON DELETE CASCADE
-        )
-      ''');
+      try {
+        await db.execute('ALTER TABLE clients ADD COLUMN type TEXT DEFAULT "CLIENT"');
+        await db.execute('ALTER TABLE clients ADD COLUMN company TEXT');
+        await db.execute('ALTER TABLE clients ADD COLUMN notes TEXT');
+        await db.execute('ALTER TABLE clients ADD COLUMN solde REAL DEFAULT 0');
+      } catch (e) {
+        print('Error adding columns to clients: $e');
+      }
+    }
+    
+    if (oldVersion < 3) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS categories(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            type TEXT NOT NULL
+          )
+        ''');
+        await db.execute('ALTER TABLE clients ADD COLUMN categoryId INTEGER');
+      } catch (e) {
+        print('Error creating categories table: $e');
+      }
+    }
+    
+    if (oldVersion < 4) {
+      try {
+        await db.execute('ALTER TABLE credits ADD COLUMN imagePath TEXT');
+        await db.execute('ALTER TABLE paiements ADD COLUMN imagePath TEXT');
+      } catch (e) {
+        print('Error adding imagePath columns: $e');
+      }
     }
   }
 
-  // ==================== CLIENT METHODS ====================
+  // ==================== دوال التصنيفات ====================
+
+  Future<Category> createCategory(Category category) async {
+    final db = await database;
+    final id = await db.insert('categories', category.toMap());
+    return Category(id: id, name: category.name, type: category.type);
+  }
+
+  Future<List<Category>> getCategoriesByType(String type) async {
+    final db = await database;
+    final result = await db.query(
+      'categories',
+      where: 'type = ?',
+      whereArgs: [type],
+      orderBy: 'name ASC',
+    );
+    return result.map((json) => Category.fromMap(json)).toList();
+  }
+
+  Future<List<Category>> getAllCategories() async {
+    final db = await database;
+    final result = await db.query('categories', orderBy: 'name ASC');
+    return result.map((json) => Category.fromMap(json)).toList();
+  }
+
+  Future<void> deleteCategory(int id) async {
+    final db = await database;
+    await db.delete('categories', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ==================== دوال العملاء ====================
+
   Future<Client> createClient(Client client) async {
     final db = await database;
     final id = await db.insert('clients', client.toMap());
@@ -105,7 +186,23 @@ class DatabaseHelper {
       telephone: client.telephone,
       adresse: client.adresse,
       dateCreation: client.dateCreation,
+      solde: client.solde,
+      type: client.type,
+      categoryId: client.categoryId,
+      company: client.company,
+      notes: client.notes,
     );
+  }
+
+  Future<List<Client>> getClientsByType(String type) async {
+    final db = await database;
+    final result = await db.query(
+      'clients',
+      where: 'type = ?',
+      whereArgs: [type],
+      orderBy: 'nom ASC',
+    );
+    return result.map((json) => Client.fromMap(json)).toList();
   }
 
   Future<List<Client>> getAllClients() async {
@@ -123,15 +220,38 @@ class DatabaseHelper {
     return null;
   }
 
+  Future<void> updateClient(Client client) async {
+    final db = await database;
+    await db.update(
+      'clients',
+      client.toMap(),
+      where: 'id = ?',
+      whereArgs: [client.id],
+    );
+  }
+
   Future<void> deleteClient(int id) async {
     final db = await database;
     await db.delete('clients', where: 'id = ?', whereArgs: [id]);
   }
 
-  // ==================== CREDIT METHODS ====================
+  Future<void> updateClientSolde(int clientId) async {
+    final solde = await getSoldeClient(clientId);
+    final db = await database;
+    await db.update(
+      'clients',
+      {'solde': solde},
+      where: 'id = ?',
+      whereArgs: [clientId],
+    );
+  }
+
+  // ==================== دوال الكريديات ====================
+
   Future<Credit> createCredit(Credit credit) async {
     final db = await database;
     final id = await db.insert('credits', credit.toMap());
+    await updateClientSolde(credit.clientId);
     return Credit(
       id: id,
       clientId: credit.clientId,
@@ -139,6 +259,7 @@ class DatabaseHelper {
       montantRestant: credit.montantRestant,
       dateCredit: credit.dateCredit,
       description: credit.description,
+      imagePath: credit.imagePath,
     );
   }
 
@@ -161,9 +282,20 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [credit.id],
     );
+    await updateClientSolde(credit.clientId);
   }
 
-  // ==================== PAIEMENT METHODS ====================
+  Future<Credit?> getCredit(int id) async {
+    final db = await database;
+    final result = await db.query('credits', where: 'id = ?', whereArgs: [id]);
+    if (result.isNotEmpty) {
+      return Credit.fromMap(result.first);
+    }
+    return null;
+  }
+
+  // ==================== دوال الدفعات ====================
+
   Future<Paiement> createPaiement(Paiement paiement) async {
     final db = await database;
     final id = await db.insert('paiements', paiement.toMap());
@@ -180,16 +312,8 @@ class DatabaseHelper {
       montant: paiement.montant,
       datePaiement: paiement.datePaiement,
       note: paiement.note,
+      imagePath: paiement.imagePath,
     );
-  }
-
-  Future<Credit?> getCredit(int id) async {
-    final db = await database;
-    final result = await db.query('credits', where: 'id = ?', whereArgs: [id]);
-    if (result.isNotEmpty) {
-      return Credit.fromMap(result.first);
-    }
-    return null;
   }
 
   Future<List<Paiement>> getPaiementsCredit(int creditId) async {
@@ -203,7 +327,8 @@ class DatabaseHelper {
     return result.map((json) => Paiement.fromMap(json)).toList();
   }
 
-  // ==================== CHEQUE METHODS ====================
+  // ==================== دوال الشيكات ====================
+
   Future<Cheque> createCheque(Cheque cheque) async {
     final db = await database;
     final id = await db.insert('cheques', cheque.toMap());
@@ -241,7 +366,8 @@ class DatabaseHelper {
     );
   }
 
-  // ==================== HELPER METHODS ====================
+  // ==================== دوال مساعدة ====================
+
   Future<double> getSoldeClient(int clientId) async {
     final credits = await getCreditsClient(clientId);
     double solde = 0;
@@ -260,6 +386,25 @@ class DatabaseHelper {
         SUM(credits.montantTotal - credits.montantRestant) as totalPaye
       FROM credits
     ''');
+
+    return {
+      'totalCredit': (result.first['totalCredit'] as num?)?.toDouble() ?? 0,
+      'totalRestant': (result.first['totalRestant'] as num?)?.toDouble() ?? 0,
+      'totalPaye': (result.first['totalPaye'] as num?)?.toDouble() ?? 0,
+    };
+  }
+
+  Future<Map<String, double>> getStatsByType(String type) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT 
+        SUM(c.montantTotal) as totalCredit,
+        SUM(c.montantRestant) as totalRestant,
+        SUM(c.montantTotal - c.montantRestant) as totalPaye
+      FROM credits c
+      JOIN clients cl ON c.clientId = cl.id
+      WHERE cl.type = ?
+    ''', [type]);
 
     return {
       'totalCredit': (result.first['totalCredit'] as num?)?.toDouble() ?? 0,
