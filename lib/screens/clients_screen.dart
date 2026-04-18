@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../database_helper.dart';
 import '../models.dart';
 import '../utils/helpers.dart';
-import 'client_detail_screen.dart';
+import 'client_detail_screen.dart';  // هذا السطر مهم جداً
 import 'add_client_sheet.dart';
 
 class ClientsScreen extends StatefulWidget {
-  final String type; // 'CLIENT' or 'SUPPLIER'
+  final String type;
   const ClientsScreen({super.key, required this.type});
 
   @override
@@ -48,7 +48,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: Column(
         children: [
-          // شريط البحث
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -69,7 +68,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
               onChanged: (v) => setState(() => _search = v),
             ),
           ),
-          // القائمة
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator(color: Color(0xFF1B8A6B)))
@@ -177,7 +175,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
     );
   }
 
-  // دالة لتحديد نص الرصيد حسب النوع
   String _getSoldeText(double solde) {
     if (widget.type == 'CLIENT') {
       return solde > 0 ? 'عليه لك' : 'مسوى';

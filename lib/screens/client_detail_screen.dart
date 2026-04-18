@@ -269,7 +269,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
         Icons.document_scanner_outlined,
         'ما كاين حتى شيك',
         'إضافة شيك',
-        () => _ajouterCheque(),
+        _ajouterCheque,
       );
     }
     return Column(
@@ -502,19 +502,24 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     );
   }
 
+  // ✅ FIX: pass creditId (not clientId) to AddChequeSheet
   void _ajouterCheque() {
     final open = _credits.where((c) => !c.estSolde).toList();
     if (open.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('لا يمكن إضافة شيك بدون كريدي مفتوح',
-              style: TextStyle(fontFamily: 'Cairo'))));
+        content: Text('خلق كريدي أولاً قبل إضافة شيك', style: TextStyle(fontFamily: 'Cairo')),
+        backgroundColor: Color(0xFFFFA000),
+      ));
       return;
     }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => AddChequeSheet(creditId: open.first.id!, onSaved: _loadData),
+      builder: (_) => AddChequeSheet(
+        creditId: open.first.id!, // ✅ creditId not clientId
+        onSaved: _loadData,
+      ),
     );
   }
 }

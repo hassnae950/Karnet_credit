@@ -139,7 +139,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                   ),
                 ],
               ),
-              
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -158,7 +157,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                   ),
                 ),
               ),
-              
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -207,7 +205,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              
               TextField(
                 controller: _noteCtrl,
                 textAlign: TextAlign.right,
@@ -225,7 +222,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              
               OutlinedButton.icon(
                 onPressed: _pickImage,
                 icon: const Icon(Icons.add_photo_alternate),
@@ -239,10 +235,8 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                   ),
                 ),
               ),
-              
               _buildThumbnail(),
               const SizedBox(height: 8),
-              
               GestureDetector(
                 onTap: _setFullAmount,
                 child: Container(
@@ -260,7 +254,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -324,15 +317,11 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
 
   Future<void> _save(double montant) async {
     if (montant <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('دخل مبلغ صحيح', style: TextStyle(fontFamily: 'Cairo'))),
-      );
+      _showError('دخل مبلغ صحيح');
       return;
     }
     if (montant > widget.credit.montantRestant) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('المبلغ أكبر من الباقي', style: TextStyle(fontFamily: 'Cairo'))),
-      );
+      _showError('المبلغ أكبر من الباقي');
       return;
     }
     
@@ -349,14 +338,25 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
         ),
       );
       
+      _showSuccess('تم تسجيل دفعة بقيمة ${_displayAmount} درهم');
       widget.onSaved();
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('حدث خطأ: $e'), backgroundColor: Colors.red),
-      );
+      _showError('حدث خطأ: $e');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.green),
+    );
   }
 }
