@@ -412,4 +412,99 @@ class DatabaseHelper {
       'totalPaye': (result.first['totalPaye'] as num?)?.toDouble() ?? 0,
     };
   }
+
+  // ==================== FIFO Payment ====================
+
+  /// Distributes a payment across open credits, oldest first (FIFO)
+  Future<void> createPaiementFIFO(
+    int clientId,
+    double montant, {
+    String? note,
+    String? imagePath,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      'credits',
+      where: 'clientId = ? AND montantRestant > 0',
+      whereArgs: [clientId],
+      orderBy: 'dateCredit ASC', // oldest first
+    );
+    final openCredits = rows.map((m) => Credit.fromMap(m)).toList();
+    if (openCredits.isEmpty) return;
+
+    double remaining = montant;
+    final now = DateTime.now();
+
+    for (final credit in openCredits) {
+      if (remaining <= 0) break;
+      final toPay = remaining >= credit.montantRestant
+          ? credit.montantRestant
+          : remaining;
+      await createPaiement(Paiement(
+        creditId: credit.id!,
+        montant: toPay,
+        datePaiement: now,
+        note: note,
+        imagePath: imagePath,
+      ));
+      remaining -= toPay;
+    }
+  }
+
+  // ==================== Flat transactions list with running balance ====================
+
+  Future<List<Map<String, dynamic>>> getAllTransactionsClient(int clientId) async {
+    final db = await database;
+
+    final creditRows = await db.query(
+      'credits',
+      where: 'clientId = ?',
+      whereArgs: [clientId],
+    );
+
+    List<Map<String, dynamic>> all = [];
+
+    for (final cr in creditRows) {
+      all.add({
+        'type': 'CREDIT',
+        'id': cr['id'],
+        'amount': (cr['montantTotal'] as num).toDouble(),
+        'date': cr['dateCredit'] as String,
+        'description': cr['description'],
+        'imagePath': cr['imagePath'],
+      });
+
+      final pRows = await db.query(
+        'paiements',
+        where: 'creditId = ?',
+        whereArgs: [cr['id']],
+      );
+      for (final p in pRows) {
+        all.add({
+          'type': 'PAYMENT',
+          'id': p['id'],
+          'amount': (p['montant'] as num).toDouble(),
+          'date': p['datePaiement'] as String,
+          'description': p['note'],
+          'imagePath': p['imagePath'],
+        });
+      }
+    }
+
+    // Sort chronologically
+    all.sort((a, b) => (a['date'] as String).compareTo(b['date'] as String));
+
+    // Running balance
+    double balance = 0;
+    for (final tx in all) {
+      if (tx['type'] == 'CREDIT') {
+        balance += tx['amount'] as double;
+      } else {
+        balance -= tx['amount'] as double;
+      }
+      tx['balance'] = balance;
+    }
+
+    return all.reversed.toList(); // most recent first
+  }
 }

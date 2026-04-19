@@ -2,108 +2,73 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../database_helper.dart';
-import '../models.dart';
 import '../utils/helpers.dart';
 
+const _kPrimary = Color(0xFF1B8A6B);
+const _kGreen   = Color(0xFF388E3C);
+const _kRed     = Color(0xFFD32F2F);
+
 class AddPaiementSheet extends StatefulWidget {
-  final Credit credit;
+  /// ✅ Takes clientId + totalRestant (not a single Credit)
+  /// Payment is distributed FIFO across all open credits
+  final int clientId;
+  final double totalRestant;
   final VoidCallback onSaved;
-  const AddPaiementSheet({super.key, required this.credit, required this.onSaved});
+
+  const AddPaiementSheet({
+    super.key,
+    required this.clientId,
+    required this.totalRestant,
+    required this.onSaved,
+  });
 
   @override
   State<AddPaiementSheet> createState() => _AddPaiementSheetState();
 }
 
 class _AddPaiementSheetState extends State<AddPaiementSheet> {
-  final TextEditingController _noteCtrl = TextEditingController();
-  String _amount = '0';
-  String _displayAmount = '0';
+  final _noteCtrl = TextEditingController();
+  String _amount  = '0';
   String? _imagePath;
   bool _saving = false;
 
-  void _addNumber(String num) {
+  @override
+  void dispose() { _noteCtrl.dispose(); super.dispose(); }
+
+  // ── Calculator ──
+  void _onKey(String k) {
     setState(() {
-      if (_amount == '0') {
-        _amount = num;
-      } else {
-        _amount = _amount + num;
+      if (k == 'C') { _amount = '0'; return; }
+      if (k == '⌫') {
+        _amount = _amount.length > 1 ? _amount.substring(0, _amount.length - 1) : '0';
+        return;
       }
-      _displayAmount = _amount;
-    });
-  }
-
-  void _clear() {
-    setState(() {
-      _amount = '0';
-      _displayAmount = '0';
-    });
-  }
-
-  void _delete() {
-    setState(() {
-      if (_amount.length > 1) {
-        _amount = _amount.substring(0, _amount.length - 1);
+      if (k == '.' && _amount.contains('.')) return;
+      if (_amount == '0' && k != '.') {
+        _amount = k;
       } else {
-        _amount = '0';
+        _amount += k;
       }
-      _displayAmount = _amount;
     });
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _imagePath = picked.path);
-    }
-  }
+  void _setFull() => setState(() => _amount = widget.totalRestant.toStringAsFixed(2));
 
-  void _setFullAmount() {
-    setState(() {
-      _amount = widget.credit.montantRestant.toString();
-      _displayAmount = _amount;
-    });
-  }
-
-  Widget _buildThumbnail() {
-    if (_imagePath == null) return const SizedBox.shrink();
-    
-    return GestureDetector(
-      onTap: () => _showFullImage(),
-      child: Container(
-        margin: const EdgeInsets.only(top: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF388E3C), width: 2),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.file(
-            File(_imagePath!),
-            height: 80,
-            width: 80,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
+  Future<void> _pickImage(ImageSource src) async {
+    final x = await ImagePicker().pickImage(source: src, imageQuality: 85);
+    if (x != null) setState(() => _imagePath = x.path);
   }
 
   void _showFullImage() {
+    if (_imagePath == null) return;
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
+      builder: (_) => Dialog(
         backgroundColor: Colors.black,
         child: GestureDetector(
-          onTap: () => Navigator.pop(ctx),
+          onTap: () => Navigator.pop(context),
           child: InteractiveViewer(
-            panEnabled: true,
-            scaleEnabled: true,
-            child: Image.file(
-              File(_imagePath!),
-              fit: BoxFit.contain,
-            ),
-          ),
+            child: Image.file(File(_imagePath!), fit: BoxFit.contain)),
         ),
       ),
     );
@@ -111,8 +76,8 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final double montant = double.tryParse(_amount) ?? 0;
-    
+    final montant = double.tryParse(_amount) ?? 0;
+
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: const BoxDecoration(
@@ -120,243 +85,217 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Title
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              const Text('تسجيل دفعة',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+            ]),
+
+            // Remaining balance
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(12)),
+              child: Text(
+                'المبلغ المتبقي: ${formatMontant(widget.totalRestant)}',
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                    color: _kRed, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+              ),
+            ),
+
+            // Display amount
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F6FA), borderRadius: BorderRadius.circular(16)),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                  const Text(
-                    'تسجيل دفعة',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
-                  ),
+                  const Text('درهم',
+                      style: TextStyle(color: _kGreen, fontFamily: 'Cairo', fontSize: 16)),
+                  Text(_amount,
+                      style: const TextStyle(
+                          fontSize: 36, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
                 ],
               ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(top: 16, bottom: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFEBEE),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'المبلغ المتبقي: ${formatMontant(widget.credit.montantRestant)}',
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: Color(0xFFD32F2F),
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Cairo',
-                  ),
-                ),
+            ),
+            const SizedBox(height: 12),
+
+            // Calculator pad
+            _calcPad(),
+            const SizedBox(height: 12),
+
+            // Note
+            TextField(
+              controller: _noteCtrl,
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              style: const TextStyle(fontFamily: 'Cairo'),
+              decoration: InputDecoration(
+                hintText: 'ملاحظة (اختياري)',
+                hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                filled: true, fillColor: const Color(0xFFF5F6FA),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F6FA),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'درهم',
-                            style: TextStyle(color: Color(0xFF388E3C)),
-                          ),
-                          Text(
-                            _displayAmount,
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Cairo',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildCalculatorRow(['7', '8', '9']),
-                    _buildCalculatorRow(['4', '5', '6']),
-                    _buildCalculatorRow(['1', '2', '3']),
-                    _buildCalculatorRow(['00', '0', 'C']),
-                    Row(
-                      children: [
-                        _buildCalcButton('⌫', onTap: _delete),
-                        const SizedBox(width: 8),
-                        _buildCalcButton('.', onTap: () => _addNumber('.')),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _noteCtrl,
-                textAlign: TextAlign.right,
-                maxLines: 2,
-                style: const TextStyle(fontFamily: 'Cairo'),
-                decoration: InputDecoration(
-                  hintText: 'ملاحظة (اختياري)',
-                  hintStyle: const TextStyle(fontFamily: 'Cairo'),
-                  filled: true,
-                  fillColor: const Color(0xFFF5F6FA),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.add_photo_alternate),
-                label: const Text('إضافة صورة', style: TextStyle(fontFamily: 'Cairo')),
+            ),
+            const SizedBox(height: 8),
+
+            // Image buttons
+            Row(children: [
+              Expanded(child: OutlinedButton.icon(
+                onPressed: () => _pickImage(ImageSource.gallery),
+                icon: const Icon(Icons.photo_library),
+                label: const Text('معرض', style: TextStyle(fontFamily: 'Cairo')),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF388E3C),
-                  side: const BorderSide(color: Color(0xFF388E3C)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              _buildThumbnail(),
+                    foregroundColor: _kGreen, side: const BorderSide(color: _kGreen)),
+              )),
+              const SizedBox(width: 8),
+              Expanded(child: OutlinedButton.icon(
+                onPressed: () => _pickImage(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('كاميرا', style: TextStyle(fontFamily: 'Cairo')),
+                style: OutlinedButton.styleFrom(
+                    foregroundColor: _kGreen, side: const BorderSide(color: _kGreen)),
+              )),
+            ]),
+
+            // Image preview
+            if (_imagePath != null) ...[
               const SizedBox(height: 8),
               GestureDetector(
-                onTap: _setFullAmount,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFF1B8A6B)),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    'خلص الكل',
-                    style: TextStyle(color: Color(0xFF1B8A6B), fontFamily: 'Cairo'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF388E3C),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: _saving ? null : () => _save(montant),
-                  child: _saving
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'تأكيد الدفعة',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Cairo'),
-                        ),
+                onTap: _showFullImage,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.file(File(_imagePath!),
+                      height: 80, width: 80, fit: BoxFit.cover),
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildCalculatorRow(List<String> buttons) {
-    return Row(
-      children: buttons.map((btn) => _buildCalcButton(btn, onTap: () {
-        if (btn == 'C') {
-          _clear();
-        } else {
-          _addNumber(btn);
-        }
-      })).toList(),
-    );
-  }
-
-  Widget _buildCalcButton(String text, {VoidCallback? onTap}) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Center(
-              child: Text(
-                text,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            const SizedBox(height: 8),
+            // Full amount shortcut
+            GestureDetector(
+              onTap: _setFull,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(color: _kPrimary),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text('خلص الكل',
+                    style: TextStyle(color: _kPrimary, fontFamily: 'Cairo')),
               ),
             ),
-          ),
+            const SizedBox(height: 16),
+
+            // Confirm button
+            SizedBox(
+              width: double.infinity, height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kGreen,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: _saving ? null : () => _save(montant),
+                child: _saving
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('تأكيد الدفعة',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Cairo')),
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _calcPad() {
+    final rows = [
+      ['7', '8', '9'],
+      ['4', '5', '6'],
+      ['1', '2', '3'],
+      ['00', '0', 'C'],
+      ['⌫', '.', ''],
+    ];
+    return Column(
+      children: rows.map((row) => Row(
+        children: row.map((k) => k.isEmpty
+            ? const Expanded(child: SizedBox())
+            : Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(3),
+                  child: GestureDetector(
+                    onTap: () => _onKey(k),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: k == 'C'
+                            ? const Color(0xFFFFEBEE)
+                            : k == '⌫'
+                                ? const Color(0xFFF5F6FA)
+                                : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Center(
+                        child: Text(k,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: k == 'C' ? _kRed : Colors.black87,
+                            )),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+        ).toList(),
+      )).toList(),
     );
   }
 
   Future<void> _save(double montant) async {
     if (montant <= 0) {
-      _showError('دخل مبلغ صحيح');
-      return;
+      _snack('دخل مبلغ صحيح', isError: true); return;
     }
-    if (montant > widget.credit.montantRestant) {
-      _showError('المبلغ أكبر من الباقي');
-      return;
+    if (montant > widget.totalRestant + 0.01) {
+      _snack('المبلغ أكبر من الرصيد (${formatMontant(widget.totalRestant)})', isError: true); return;
     }
-    
     setState(() => _saving = true);
-    
     try {
-      await DatabaseHelper.instance.createPaiement(
-        Paiement(
-          creditId: widget.credit.id!,
-          montant: montant,
-          datePaiement: DateTime.now(),
-          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-          imagePath: _imagePath,
-        ),
+      // ✅ FIFO: distributes across open credits oldest-first
+      await DatabaseHelper.instance.createPaiementFIFO(
+        widget.clientId,
+        montant,
+        note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+        imagePath: _imagePath,
       );
-      
-      _showSuccess('تم تسجيل دفعة بقيمة ${_displayAmount} درهم');
+      _snack('تم تسجيل دفعة ${formatMontant(montant)}', isError: false);
       widget.onSaved();
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      _showError('حدث خطأ: $e');
+      _snack('خطأ: $e', isError: true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message, style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
-    );
-  }
-
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message, style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.green),
-    );
+  void _snack(String msg, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
+      backgroundColor: isError ? Colors.red : _kGreen,
+    ));
   }
 }
