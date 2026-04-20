@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'clients_screen.dart';
+import 'app_settings_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Column(
         children: [
-          // AppBar مع تبويبات
           Container(
             decoration: const BoxDecoration(
               color: Color(0xFF1B8A6B),
@@ -40,26 +41,45 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: SafeArea(
               child: Column(
                 children: [
-                  // العنوان
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                     child: Row(
                       children: [
-                        Icon(Icons.menu_book_rounded, color: Colors.white),
-                        SizedBox(width: 12),
-                        Text(
-                          'كارنيه',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Cairo',
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const AppSettingsScreen()),
+                          ),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.settings_outlined,
+                                color: Colors.white, size: 20),
                           ),
                         ),
+                        const Spacer(),
+                        const Row(children: [
+                          Text(
+                            'كارنيه',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.menu_book_rounded,
+                              color: Colors.white, size: 22),
+                        ]),
                       ],
                     ),
                   ),
-                  // تبويبات
                   TabBar(
                     controller: _tabController,
                     indicatorColor: Colors.white,
@@ -79,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
-          // محتوى التبويبات
           Expanded(
             child: TabBarView(
               controller: _tabController,

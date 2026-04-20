@@ -7,13 +7,12 @@ import 'add_client_sheet.dart';
 
 class ClientsScreen extends StatefulWidget {
   final String type;
-  const ClientsScreen({super.key, required this.type});
-
+  const ClientsScreen({super.key, this.type = 'CLIENT'});
   @override
   State<ClientsScreen> createState() => _ClientsScreenState();
 }
 
-class _ClientsScreenState extends State<ClientsScreen> {
+ class _ClientsScreenState extends State<ClientsScreen> {
   List<Client> _clients = [];
   bool _loading = true;
   String _search = '';

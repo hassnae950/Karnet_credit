@@ -1,5 +1,7 @@
-import 'dart:io';
+﻿import 'dart:io';
+import '../services/pdf_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../database_helper.dart';
 import '../models.dart';
@@ -208,8 +210,8 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _actionBtn(Icons.bar_chart_rounded, 'تقرير', _showReport),
-        _actionBtn(Icons.share_rounded,     'مشاركة', _shareClient),
+        _actionBtn(Icons.print_rounded, 'طبع', _showReport),
+        _actionBtn(Icons.content_copy_rounded,     'نسخ', _shareClient),
         _actionBtn(Icons.phone_rounded,     'اتصال',  _callClient),
         _actionBtn(Icons.edit_note_rounded, 'ملاحظة', _addNote),
       ],
@@ -567,27 +569,134 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
     });
   }
 
-  void _showReport() {
-    // TODO: link to PDF service
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('التقرير قريباً', style: TextStyle(fontFamily: 'Cairo'))));
+  // ── طبع PDF ──
+  Future<void> _showReport() async {
+    if (_transactions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('ما كاين حتى معاملة للطباعة', style: TextStyle(fontFamily: 'Cairo'))));
+      return;
+    }
+    try {
+      final credits = await DatabaseHelper.instance.getCreditsClient(widget.client.id!);
+      final pMap = <int, List<Paiement>>{};
+      for (final c in credits) {
+        pMap[c.id!] = await DatabaseHelper.instance.getPaiementsCredit(c.id!);
+      }
+      await PdfService.instance.printClientReport(widget.client, credits, pMap);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('خطأ: $e', style: const TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.red));
+    }
   }
 
-  void _shareClient() {
-    final info = StringBuffer();
-    info.write('العميل: ${widget.client.nom}\n');
-    if (widget.client.telephone != null) info.write('الهاتف: ${widget.client.telephone}\n');
-    info.write('الرصيد: ${formatMontant(_solde)}');
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('المشاركة قريباً', style: TextStyle(fontFamily: 'Cairo'))));
-  }
+  // ── نسخ ──
+  void _shareClient() async {
+    final lines = StringBuffer();
+    lines.writeln('العميل: ${widget.client.nom}');
+    if (widget.client.telephone != null) lines.writeln('الهاتف: ${widget.client.telephone}');
+    if (widget.client.company   != null) lines.writeln('الشركة: ${widget.client.company}');
+    lines.writeln('الرصيد: ${formatMontant(_solde)}');
+    lines.writeln('عدد المعاملات: ${_transactions.length}');
+await Clipboard.setData(ClipboardData(text: lines.toString()));
+if (mounted) {
+  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    content: Text('تم نسخ المعلومات ✓', style: TextStyle(fontFamily: 'Cairo')),
+    backgroundColor: Color(0xFF1B8A6B),
+  ));
+}  }
 
+  // ── اتصال ──
   void _callClient() async {
-    if (widget.client.telephone == null) return;
+    if (widget.client.telephone == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('ما كاين حتى رقم هاتف', style: TextStyle(fontFamily: 'Cairo'))));
+      return;
+    }
     final uri = Uri.parse('tel:${widget.client.telephone}');
-    if (await canLaunchUrl(uri)) launchUrl(uri);
+    if (await canLaunchUrl(uri)) {
+      launchUrl(uri);
+    }
   }
 
-  void _addNote() => ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('الملاحظة قريباً', style: TextStyle(fontFamily: 'Cairo'))));
+  // ── ملاحظة ──
+  void _addNote() {
+    final ctrl = TextEditingController(text: widget.client.notes ?? '');
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close)),
+                const Text('ملاحظة',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
+                        fontFamily: 'Cairo')),
+              ]),
+              const SizedBox(height: 12),
+              TextField(
+                controller: ctrl,
+                textAlign: TextAlign.right,
+                maxLines: 5,
+                autofocus: true,
+                style: const TextStyle(fontFamily: 'Cairo'),
+                decoration: InputDecoration(
+                  hintText: 'أضف ملاحظة عن هذا العميل...',
+                  hintStyle: const TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+                  filled: true,
+                  fillColor: const Color(0xFFF5F6FA),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1B8A6B),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onPressed: () async {
+                    final note = ctrl.text.trim().isEmpty ? null : ctrl.text.trim();
+                    widget.client.notes = note;
+                    await DatabaseHelper.instance.updateClient(widget.client);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('تم حفظ الملاحظة ✅',
+                              style: TextStyle(fontFamily: 'Cairo')),
+                          backgroundColor: Color(0xFF1B8A6B)));
+                    }
+                  },
+                  child: const Text('حفظ',
+                      style: TextStyle(color: Colors.white, fontSize: 16,
+                          fontFamily: 'Cairo')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+

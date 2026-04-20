@@ -450,7 +450,33 @@ class DatabaseHelper {
       remaining -= toPay;
     }
   }
+Future<Map<String, dynamic>> exportAllData() async {
+    final db = await database;
+    return {
+      'clients':   await db.query('clients'),
+      'credits':   await db.query('credits'),
+      'paiements': await db.query('paiements'),
+      'cheques':   await db.query('cheques'),
+    };
+  }
 
+  Future<void> importData(Map<String, dynamic> data) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final t in ['cheques','paiements','credits','clients']) await txn.delete(t);
+      for (var r in (data['clients']   as List)) await txn.insert('clients',   Map<String,dynamic>.from(r));
+      for (var r in (data['credits']   as List)) await txn.insert('credits',   Map<String,dynamic>.from(r));
+      for (var r in (data['paiements'] as List)) await txn.insert('paiements', Map<String,dynamic>.from(r));
+      if (data['cheques'] != null) for (var r in (data['cheques'] as List)) await txn.insert('cheques', Map<String,dynamic>.from(r));
+    });
+  }
+
+  Future<void> deleteAllData() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final t in ['cheques','paiements','credits','clients']) await txn.delete(t);
+    });
+  }
   // ==================== Flat transactions list with running balance ====================
 
   Future<List<Map<String, dynamic>>> getAllTransactionsClient(int clientId) async {
@@ -507,4 +533,5 @@ class DatabaseHelper {
 
     return all.reversed.toList(); // most recent first
   }
+  
 }

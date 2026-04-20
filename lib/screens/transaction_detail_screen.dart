@@ -2,12 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../database_helper.dart';
-import '../models.dart';
 import '../utils/helpers.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
-const _kRed     = Color(0xFFD32F2F);
 const _kGreen   = Color(0xFF388E3C);
+const _kRed     = Color(0xFFD32F2F);
 const _kBlue    = Color(0xFF1976D2);
 
 class TransactionDetailScreen extends StatefulWidget {
@@ -176,15 +175,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               ),
 
             // "Recorded" badge
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text('معاملة مسجلة',
-                    style: TextStyle(
-                        color: _kGreen, fontFamily: 'Cairo', fontSize: 12)),
-                const SizedBox(width: 4),
-                const Icon(Icons.check, color: _kGreen, size: 16),
-              ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'مسجلة',
+                style: TextStyle(
+                    color: Colors.grey, fontFamily: 'Cairo', fontSize: 13),
+              ),
             ),
 
             const Spacer(),
@@ -223,7 +224,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     elevation: 0,
                   ),
                   onPressed: _shareTx,
-                  child: const Text('مشاركة',
+                  child: const Text('نسخ',
                       style: TextStyle(color: Colors.white, fontFamily: 'Cairo', fontSize: 16)),
                 ),
               ),
@@ -250,6 +251,20 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   // ─────────────────────────── Edit ───────────────────────────
   void _editTransaction() {
+    final ctx = context;
+     showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditTxSheet(
+        tx: _tx,
+        onSaved: (newDesc, newAmount) async {
+          await _applyEdit(newDesc, newAmount);
+          Navigator.pop(ctx); // close sheet
+        },
+      ),
+    );
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
