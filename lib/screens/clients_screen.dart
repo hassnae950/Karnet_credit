@@ -44,7 +44,7 @@ class ClientsScreen extends StatefulWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(
@@ -57,7 +57,7 @@ class ClientsScreen extends StatefulWidget {
                 hintStyle: const TextStyle(fontFamily: 'Cairo'),
                 prefixIcon: const Icon(Icons.search, color: Color(0xFF1B8A6B)),
                 filled: true,
-                fillColor: Colors.white,
+               fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
@@ -99,7 +99,7 @@ class ClientsScreen extends StatefulWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(

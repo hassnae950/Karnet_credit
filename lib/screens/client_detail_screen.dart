@@ -1,24 +1,18 @@
 ﻿import 'dart:io';
-import '../services/pdf_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../database_helper.dart';
 import '../models.dart';
 import '../utils/helpers.dart';
 import 'add_credit_sheet.dart';
-import 'transaction_detail_screen.dart';
 import 'add_paiement_sheet.dart';
 import 'add_cheque_sheet.dart';
+import 'transaction_detail_screen.dart';
 import 'client_settings_screen.dart';
+import 'package:flutter/services.dart';
+import '../services/pdf_service.dart';
 
-const kPrimary = Color(0xFF1B8A6B);
-const kRed     = Color(0xFFD32F2F);
-const kGreen   = Color(0xFF388E3C);
-const kYellow  = Color(0xFFFFA000);
-const kBg      = Color(0xFFF5F6FA);
-const kRedBg   = Color(0xFFFFEBEE);
-const kGreenBg = Color(0xFFE8F5E9);
+const kYellow = Color(0xFFFFA000); // للشيكات
 
 class ClientDetailScreen extends StatefulWidget {
   final Client client;
@@ -30,10 +24,10 @@ class ClientDetailScreen extends StatefulWidget {
 
 class _ClientDetailScreenState extends State<ClientDetailScreen> {
   List<Map<String, dynamic>> _transactions = [];
-  List<Cheque>  _cheques  = [];
-  double        _solde    = 0;
-  bool          _loading  = true;
-  bool          _showCheques = false;
+  List<Cheque> _cheques = [];
+  double _solde = 0;
+  bool _loading = true;
+  bool _showCheques = false;
 
   @override
   void initState() {
@@ -43,33 +37,21 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
 
   Future<void> _loadData() async {
     setState(() => _loading = true);
-    final txs    = await DatabaseHelper.instance.getAllTransactionsClient(widget.client.id!);
-    final solde  = await DatabaseHelper.instance.getSoldeClient(widget.client.id!);
+    final txs = await DatabaseHelper.instance.getAllTransactionsClient(widget.client.id!);
+    final solde = await DatabaseHelper.instance.getSoldeClient(widget.client.id!);
     final credits = await DatabaseHelper.instance.getCreditsClient(widget.client.id!);
+
     final allCheques = <Cheque>[];
     for (final c in credits) {
       allCheques.addAll(await DatabaseHelper.instance.getChequesCredit(c.id!));
     }
+
     setState(() {
       _transactions = txs;
-      _cheques      = allCheques;
-      _solde        = solde;
-      _loading      = false;
+      _cheques = allCheques;
+      _solde = solde;
+      _loading = false;
     });
-  }
-
-  // ── Helpers ──
-  String _formatTxDate(String isoDate) {
-    final d   = DateTime.parse(isoDate).toLocal();
-    final now = DateTime.now();
-    final h   = d.hour.toString().padLeft(2, '0');
-    final m   = d.minute.toString().padLeft(2, '0');
-    final today = DateTime(now.year, now.month, now.day);
-    final txDay = DateTime(d.year, d.month, d.day);
-    if (txDay == today) return 'اليوم ساعة $h:$m';
-    const mo = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو',
-                    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-    return '${d.day} ${mo[d.month]} ساعة $h:$m';
   }
 
   void _showFullImage(String path) {
@@ -78,32 +60,43 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
       builder: (_) => Dialog(
         backgroundColor: Colors.black,
         insetPadding: EdgeInsets.zero,
-        child: Stack(children: [
-          InteractiveViewer(
-            panEnabled: true, scaleEnabled: true,
-            child: Center(
-              child: Image.file(File(path), fit: BoxFit.contain)),
-          ),
-          Positioned(
-            top: 40, right: 10,
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close, color: Colors.white, size: 30)),
-          ),
-        ]),
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              panEnabled: true,
+              scaleEnabled: true,
+              child: Center(child: Image.file(File(path), fit: BoxFit.contain)),
+            ),
+            Positioned(
+              top: 40,
+              right: 10,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // ── Build ──
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: kBg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kPrimary,
-        title: Text(widget.client.nom,
-            style: const TextStyle(color: Colors.white, fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF1B8A6B),
+        title: Text(
+          widget.client.nom,
+          style: const TextStyle(
+            color: Colors.white,
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
         actions: [
@@ -117,176 +110,158 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: kPrimary))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF1B8A6B)))
           : RefreshIndicator(
-              color: kPrimary,
+              color: const Color(0xFF1B8A6B),
               onRefresh: _loadData,
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 100),
                 children: [
-                  // Contact info line
-                  if (widget.client.telephone != null)
-                    _contactBar(),
-
-                  // Balance card
-                  _balanceCard(),
-
-                  // Action buttons
+                  if (widget.client.telephone != null) _contactBar(),
+                  _balanceCard(theme),
                   _actionButtons(),
-
-                  // Cheques / transactions toggle
                   if (_cheques.isNotEmpty) _sectionToggle(),
-
-                  // Transactions or Cheques
-                  _showCheques ? _chequesList() : _transactionsList(),
+                  _showCheques ? _chequesList(theme) : _transactionsList(theme),
                 ],
               ),
             ),
-      bottomNavigationBar: _bottomBar(),
+      bottomNavigationBar: _bottomBar(theme),
     );
   }
 
-  // ── Contact bar ──
+  // ── Contact Bar ──
   Widget _contactBar() => GestureDetector(
-    onTap: () async {
-      final tel = 'tel:${widget.client.telephone}';
-      if (await canLaunchUrl(Uri.parse(tel))) {
-        launchUrl(Uri.parse(tel));
-      }
-    },
-    child: Container(
-      color: kPrimary.withOpacity(0.08),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.phone, color: kPrimary, size: 16),
-          const SizedBox(width: 6),
-          Text(
-            widget.client.telephone!,
-            style: const TextStyle(
-                color: kPrimary, fontFamily: 'Cairo', fontSize: 13),
+        onTap: () async {
+          final tel = 'tel:${widget.client.telephone}';
+          if (await canLaunchUrl(Uri.parse(tel))) {
+            launchUrl(Uri.parse(tel));
+          }
+        },
+        child: Container(
+          color: const Color(0xFF1B8A6B).withOpacity(0.08),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.phone, color: Color(0xFF1B8A6B), size: 18),
+              const SizedBox(width: 8),
+              Text(
+                widget.client.telephone!,
+                style: const TextStyle(color: Color(0xFF1B8A6B), fontFamily: 'Cairo'),
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
-          const Text('• اضغط للاتصال',
-              style: TextStyle(color: Colors.grey, fontFamily: 'Cairo', fontSize: 11)),
-        ],
-      ),
-    ),
-  );
-
-  // ── Balance card ──
-  Widget _balanceCard() => Container(
-    width: double.infinity,
-    margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0,4))],
-    ),
-    child: Column(children: [
-      const Text('الرصيد',
-          style: TextStyle(color: Colors.grey, fontSize: 14, fontFamily: 'Cairo')),
-      const SizedBox(height: 8),
-      Text(
-        formatMontant(_solde),
-        style: TextStyle(
-          color: _solde > 0 ? kRed : kGreen,
-          fontSize: 32, fontWeight: FontWeight.bold, fontFamily: 'Cairo',
         ),
-      ),
-      if (widget.client.company != null) ...[
-        const SizedBox(height: 4),
-        Text(widget.client.company!,
-            style: const TextStyle(color: Colors.grey, fontFamily: 'Cairo', fontSize: 12)),
-      ],
-    ]),
-  );
+      );
 
-  // ── Action buttons ──
+  // ── Balance Card ──
+  Widget _balanceCard(ThemeData theme) => Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Column(
+          children: [
+            const Text('الرصيد', style: TextStyle(color: Colors.grey, fontFamily: 'Cairo')),
+            const SizedBox(height: 8),
+            Text(
+              formatMontant(_solde),
+              style: TextStyle(
+                color: _solde > 0 ? Colors.red : Colors.green,
+                fontSize: 34,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Cairo',
+              ),
+            ),
+            if (widget.client.company != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  widget.client.company!,
+                  style: const TextStyle(color: Colors.grey, fontFamily: 'Cairo'),
+                ),
+              ),
+          ],
+        ),
+      );
+
+  // ── Action Buttons ──
   Widget _actionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _actionBtn(Icons.print_rounded, 'طبع', _showReport),
-        _actionBtn(Icons.content_copy_rounded,     'نسخ', _shareClient),
-        _actionBtn(Icons.phone_rounded,     'اتصال',  _callClient),
-        _actionBtn(Icons.edit_note_rounded, 'ملاحظة', _addNote),
-      ],
-    ),
-  );
-
-  Widget _actionBtn(IconData icon, String label, VoidCallback onTap) =>
-    GestureDetector(
-      onTap: onTap,
-      child: Column(children: [
-        Container(
-          width: 52, height: 52,
-          decoration: BoxDecoration(
-            color: kPrimary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: kPrimary, size: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _actionBtn(Icons.print_rounded, 'طبع', _showReport),
+            _actionBtn(Icons.content_copy_rounded, 'نسخ', _shareClient),
+            _actionBtn(Icons.phone_rounded, 'اتصال', _callClient),
+            _actionBtn(Icons.edit_note_rounded, 'ملاحظة', _addNote),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(
-            color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
-      ]),
-    );
+      );
 
-  // ── Section toggle (transactions / cheques) ──
+  Widget _actionBtn(IconData icon, String label, VoidCallback onTap) => GestureDetector(
+        onTap: onTap,
+        child: Column(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1B8A6B).withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: const Color(0xFF1B8A6B), size: 26),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Cairo'),
+            ),
+          ],
+        ),
+      );
+
+  // ── Toggle between Transactions & Cheques ──
   Widget _sectionToggle() => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        GestureDetector(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+        child: GestureDetector(
           onTap: () => setState(() => _showCheques = !_showCheques),
           child: Text(
             _showCheques
-                ? 'الشيكات (${_cheques.length})'
-                : 'معاملات (${_transactions.length})',
+                ? 'الشيكات (${_cheques.length}) ← المعاملات'
+                : 'المعاملات (${_transactions.length}) ← الشيكات',
             style: const TextStyle(
-                color: kPrimary, fontFamily: 'Cairo',
-                fontSize: 13, fontWeight: FontWeight.w600),
+              color: Color(0xFF1B8A6B),
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        GestureDetector(
-          onTap: () => setState(() => _showCheques = !_showCheques),
-          child: Text(
-            _showCheques ? 'المعاملات' : 'الشيكات (${_cheques.length})',
-            style: const TextStyle(
-                color: kPrimary, fontFamily: 'Cairo', fontSize: 12),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
-  // ── Transactions list (image 1 style) ──
-  Widget _transactionsList() {
+  // ── Transactions List ──
+  Widget _transactionsList(ThemeData theme) {
     if (_transactions.isEmpty) {
-      return _emptyState(Icons.receipt_long_outlined, 'ما كاين حتى معاملة');
+      return _emptyState(Icons.receipt_long_outlined, 'ما كاين حتى معاملة', theme);
     }
-    final label = _cheques.isEmpty ? 'معاملات (${_transactions.length})' : null;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (label != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(label,
-                style: const TextStyle(
-                    color: Colors.grey, fontSize: 13, fontFamily: 'Cairo')),
-          ),
-        ...  _transactions.map(_transactionItem),
-      ],
+      children: _transactions.map((tx) => _transactionItem(tx, theme)).toList(),
     );
   }
 
-  Widget _transactionItem(Map<String, dynamic> tx) {
+  Widget _transactionItem(Map<String, dynamic> tx, ThemeData theme) {
+    final isCredit = tx['type'] == 'CREDIT';
+    final amount = tx['amount'] as double;
+    final balance = tx['balance'] as double;
+    final date = _formatTxDate(tx['date'] as String);
+    final imagePath = tx['imagePath'] as String?;
+    final desc = tx['description'] as String?;
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -298,250 +273,270 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
           ),
         ),
       ).then((_) => _loadData()),
-      child: _transactionItemContent(tx),
-    );
-  }
-
-  Widget _transactionItemContent(Map<String, dynamic> tx) {
-    final isCredit  = tx['type'] == 'CREDIT';
-    final amount    = tx['amount'] as double;
-    final balance   = tx['balance'] as double;
-    final date      = _formatTxDate(tx['date'] as String);
-    final imagePath = tx['imagePath'] as String?;
-    final desc      = tx['description'] as String?;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(
-            color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0,2))],
-      ),
-      child: Row(
-        children: [
-          // ── Arrow circle ──
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              color: isCredit ? kPrimary : Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isCredit ? kPrimary : Colors.grey.shade300,
-                width: 1.5,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Arrow Circle
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isCredit ? const Color(0xFF1B8A6B) : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isCredit ? const Color(0xFF1B8A6B) : Colors.grey.shade400,
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                isCredit ? Icons.arrow_downward : Icons.arrow_upward,
+                color: isCredit ? Colors.white : Colors.grey.shade700,
+                size: 24,
               ),
             ),
-            child: Icon(
-              isCredit ? Icons.arrow_downward : Icons.arrow_upward,
-              color: isCredit ? Colors.white : Colors.black54,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 14),
 
-          // ── Date + balance + image ──
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(date,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Cairo',
-                        fontSize: 13)),
-                const SizedBox(height: 2),
-                Text(
-                  'الرصيد ${formatMontant(balance)}',
-                  style: const TextStyle(
-                      color: Colors.grey, fontFamily: 'Cairo', fontSize: 11),
-                ),
-                if (desc != null && desc.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(desc,
-                      style: const TextStyle(
-                          color: Colors.grey, fontFamily: 'Cairo', fontSize: 11),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
-                ],
-                if (imagePath != null && imagePath.isNotEmpty)
-                  GestureDetector(
-                    onTap: () => _showFullImage(imagePath),
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      width: 52, height: 42,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(File(imagePath), fit: BoxFit.cover),
+            // Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(date, style: const TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Cairo')),
+                  if (desc != null && desc.isNotEmpty)
+                    Text(
+                      desc,
+                      style: TextStyle(color: Colors.grey, fontSize: 13, fontFamily: 'Cairo'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (imagePath != null)
+                    GestureDetector(
+                      onTap: () => _showFullImage(imagePath),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(File(imagePath), height: 60, width: 60, fit: BoxFit.cover),
+                        ),
                       ),
                     ),
+                ],
+              ),
+            ),
+
+            // Amount
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatMontant(amount),
+                  style: TextStyle(
+                    color: isCredit ? Colors.red : Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontFamily: 'Cairo',
                   ),
+                ),
+                Text(
+                  isCredit ? 'أخذت' : 'أعطيت',
+                  style: TextStyle(
+                    color: isCredit ? Colors.red.withOpacity(0.7) : Colors.green.withOpacity(0.7),
+                    fontSize: 12,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
               ],
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // ── Amount + label ──
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                formatMontant(amount),
-                style: TextStyle(
-                  color: isCredit ? kRed : kGreen,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  fontFamily: 'Cairo',
+  // ── Cheques List ──
+  Widget _chequesList(ThemeData theme) {
+    if (_cheques.isEmpty) {
+      return _emptyState(Icons.document_scanner_outlined, 'ما كاين حتى شيك', theme);
+    }
+    return Column(
+      children: _cheques.map((ch) => _chequeCard(ch, theme)).toList(),
+    );
+  }
+
+  Widget _chequeCard(Cheque ch, ThemeData theme) => Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ch.statutColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    ch.statutLabel,
+                    style: TextStyle(color: ch.statutColor, fontSize: 12, fontFamily: 'Cairo'),
+                  ),
                 ),
-              ),
-              Text(
-                isCredit ? 'أخذت' : 'أعطيت',
-                style: TextStyle(
-                  color: isCredit ? kRed.withOpacity(0.6) : kGreen.withOpacity(0.6),
-                  fontSize: 11,
-                  fontFamily: 'Cairo',
+                const Spacer(),
+                Text(
+                  formatDate(ch.dateCreation),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Cairo'),
                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (ch.numero.isNotEmpty)
+                      Text('# ${ch.numero}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                    if (ch.banque != null)
+                      Text(ch.banque!, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                    Text(
+                      'استحقاق: ${formatDate(ch.dateEcheance)}',
+                      style: TextStyle(color: kYellow, fontSize: 13, fontFamily: 'Cairo'),
+                    ),
+                  ],
+                ),
+                Text(
+                  formatMontant(ch.montant),
+                  style: const TextStyle(
+                    color: Color(0xFF1B8A6B),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ],
+            ),
+            if (ch.statut == 'EN_ATTENTE') ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _statusBtn('مرفوض', 'REFUSE', Colors.red, ch.id!),
+                  const SizedBox(width: 12),
+                  _statusBtn('محصّل', 'ENCAISSE', Colors.green, ch.id!),
+                ],
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Cheques list ──
-  Widget _chequesList() {
-    if (_cheques.isEmpty) return _emptyState(Icons.document_scanner_outlined, 'ما كاين حتى شيك');
-    return Column(
-      children: _cheques.map(_chequeCard).toList(),
-    );
-  }
-
-  Widget _chequeCard(Cheque ch) => Container(
-    margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-      Row(children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: ch.statutColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(ch.statutLabel,
-              style: TextStyle(color: ch.statutColor, fontSize: 11, fontFamily: 'Cairo')),
+          ],
         ),
-        const Spacer(),
-        Text(formatDate(ch.dateCreation),
-            style: const TextStyle(color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
-      ]),
-      const SizedBox(height: 10),
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (ch.numero.isNotEmpty)
-            Text('# ${ch.numero}',
-                style: const TextStyle(color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
-          if (ch.banque != null)
-            Text(ch.banque!,
-                style: const TextStyle(color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
-          Text('استحقاق: ${formatDate(ch.dateEcheance)}',
-              style: const TextStyle(color: kYellow, fontSize: 11, fontFamily: 'Cairo')),
-        ]),
-        Text(formatMontant(ch.montant),
-            style: const TextStyle(
-                color: kPrimary, fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Cairo')),
-      ]),
-      if (ch.statut == 'EN_ATTENTE') ...[
-        const SizedBox(height: 10),
-        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          _statusBtn('مرفوض', 'REFUSE', kRed, ch.id!),
-          const SizedBox(width: 8),
-          _statusBtn('محصّل', 'ENCAISSE', kGreen, ch.id!),
-        ]),
-      ],
-    ]),
-  );
+      );
 
   Widget _statusBtn(String label, String statut, Color color, int id) => GestureDetector(
-    onTap: () async {
-      await DatabaseHelper.instance.updateChequeStatut(id, statut);
-      await _loadData();
-    },
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 12, fontFamily: 'Cairo')),
-    ),
-  );
-
-  Widget _emptyState(IconData icon, String msg) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(40),
-      child: Column(children: [
-        Icon(icon, size: 72, color: Colors.grey.shade300),
-        const SizedBox(height: 16),
-        Text(msg, style: const TextStyle(color: Colors.grey, fontSize: 16, fontFamily: 'Cairo')),
-      ]),
-    ),
-  );
-
-  // ── Bottom bar ──
-  Widget _bottomBar() => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      boxShadow: [BoxShadow(
-          color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0,-2))],
-    ),
-    child: Row(children: [
-      Expanded(
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: kRedBg, elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+        onTap: () async {
+          await DatabaseHelper.instance.updateChequeStatut(id, statut);
+          await _loadData();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withOpacity(0.3)),
           ),
-          onPressed: _ajouterPaiement,
-          icon: const Icon(Icons.arrow_upward, color: kRed),
-          label: const Text('أعطيت',
-              style: TextStyle(color: kRed, fontFamily: 'Cairo', fontSize: 15)),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: kPrimary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontFamily: 'Cairo'),
           ),
-          onPressed: _ajouterCredit,
-          icon: const Icon(Icons.arrow_downward, color: Colors.white),
-          label: const Text('أخذت',
-              style: TextStyle(color: Colors.white, fontFamily: 'Cairo', fontSize: 15)),
         ),
-      ),
-    ]),
-  );
+      );
+
+  Widget _emptyState(IconData icon, String msg, ThemeData theme) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(60),
+          child: Column(
+            children: [
+              Icon(icon, size: 80, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text(msg, style: TextStyle(color: Colors.grey, fontFamily: 'Cairo', fontSize: 16)),
+            ],
+          ),
+        ),
+      );
+
+  // ── Bottom Bar ──
+  Widget _bottomBar(ThemeData theme) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, -3)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.withOpacity(0.12),
+                  foregroundColor: Colors.red,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: _ajouterPaiement,
+                icon: const Icon(Icons.arrow_upward),
+                label: const Text('أعطيت', style: TextStyle(fontFamily: 'Cairo')),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1B8A6B),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: _ajouterCredit,
+                icon: const Icon(Icons.arrow_downward),
+                label: const Text('أخذت', style: TextStyle(fontFamily: 'Cairo')),
+              ),
+            ),
+          ],
+        ),
+      );
 
   // ── Actions ──
   void _ajouterCredit() => showModalBottomSheet(
-    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-    builder: (_) => AddCreditSheet(clientId: widget.client.id!, onSaved: _loadData),
-  );
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => AddCreditSheet(clientId: widget.client.id!, onSaved: _loadData),
+      );
 
   void _ajouterPaiement() {
     if (_solde <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('الرصيد صفر، ما كاين شي باش تخلصو',
-              style: TextStyle(fontFamily: 'Cairo'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('الرصيد صفر، ما كاين شي باش تخلصو', style: TextStyle(fontFamily: 'Cairo'))),
+      );
       return;
     }
     showModalBottomSheet(
-      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => AddPaiementSheet(
         clientId: widget.client.id!,
         totalRestant: _solde,
@@ -551,23 +546,50 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
   }
 
   void _ajouterCheque() {
-    // Need an open credit
     DatabaseHelper.instance.getCreditsClient(widget.client.id!).then((credits) {
       final open = credits.where((c) => !c.estSolde).toList();
       if (open.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('خلق كريدي أولاً قبل إضافة شيك',
-              style: TextStyle(fontFamily: 'Cairo')),
-          backgroundColor: kYellow,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('خلق كريدي أولاً قبل إضافة شيك', style: TextStyle(fontFamily: 'Cairo')),
+            backgroundColor: kYellow,
+          ),
+        );
         return;
       }
       showModalBottomSheet(
-        context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
         builder: (_) => AddChequeSheet(creditId: open.first.id!, onSaved: _loadData),
       );
     });
   }
+
+  String _formatTxDate(String isoDate) {
+    final d = DateTime.parse(isoDate).toLocal();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final txDay = DateTime(d.year, d.month, d.day);
+
+    final h = d.hour.toString().padLeft(2, '0');
+    final m = d.minute.toString().padLeft(2, '0');
+
+    if (txDay == today) return 'اليوم ساعة $h:$m';
+
+    const mo = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return '${d.day} ${mo[d.month]} ساعة $h:$m';
+  }
+
+
+
+
+
+
+
+
+
+
 
   // ── طبع PDF ──
   Future<void> _showReport() async {
@@ -697,6 +719,7 @@ if (mounted) {
       ),
     );
   }
-}
+
+ }
 
 

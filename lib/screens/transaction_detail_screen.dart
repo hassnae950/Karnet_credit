@@ -5,14 +5,15 @@ import '../database_helper.dart';
 import '../utils/helpers.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
-const _kGreen   = Color(0xFF388E3C);
-const _kRed     = Color(0xFFD32F2F);
-const _kBlue    = Color(0xFF1976D2);
+const _kGreen = Color(0xFF388E3C);
+const _kRed = Color(0xFFD32F2F);
+const _kBlue = Color(0xFF1976D2);
 
 class TransactionDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> tx; // transaction map from getAllTransactionsClient
+  final Map<String, dynamic>
+      tx; // transaction map from getAllTransactionsClient
   final String clientNom;
-  final VoidCallback onChanged;   // called after edit or delete
+  final VoidCallback onChanged; // called after edit or delete
 
   const TransactionDetailScreen({
     super.key,
@@ -22,7 +23,8 @@ class TransactionDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<TransactionDetailScreen> createState() => _TransactionDetailScreenState();
+  State<TransactionDetailScreen> createState() =>
+      _TransactionDetailScreenState();
 }
 
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
@@ -35,31 +37,45 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   }
 
   bool get _isCredit => _tx['type'] == 'CREDIT';
-  double get _amount  => (_tx['amount'] as num).toDouble();
+  double get _amount => (_tx['amount'] as num).toDouble();
   double get _balance => (_tx['balance'] as num).toDouble();
   String get _dateStr => _tx['date'] as String;
-  String? get _desc   => _tx['description'] as String?;
-  String? get _img    => _tx['imagePath'] as String?;
+  String? get _desc => _tx['description'] as String?;
+  String? get _img => _tx['imagePath'] as String?;
 
   String _formatFullDate(String iso) {
-    final d   = DateTime.parse(iso).toLocal();
+    final d = DateTime.parse(iso).toLocal();
     final now = DateTime.now();
-    final h   = d.hour.toString().padLeft(2, '0');
-    final m   = d.minute.toString().padLeft(2, '0');
+    final h = d.hour.toString().padLeft(2, '0');
+    final m = d.minute.toString().padLeft(2, '0');
     final today = DateTime(now.year, now.month, now.day);
     final txDay = DateTime(d.year, d.month, d.day);
-    const mo = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو',
-                    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const mo = [
+      '',
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر'
+    ];
     if (txDay == today) return 'اليوم ساعة $h:$m';
     return '${d.day} ${mo[d.month]} ${d.year} ساعة $h:$m';
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -68,8 +84,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         title: Text(
           widget.clientNom,
           style: const TextStyle(
-              color: _kBlue, fontFamily: 'Cairo',
-              fontWeight: FontWeight.bold, fontSize: 20),
+              color: _kBlue,
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
         ),
         centerTitle: true,
         actions: [
@@ -122,7 +140,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _kGreen.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -197,12 +216,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 GestureDetector(
                   onTap: _editTransaction,
                   child: Container(
-                    width: 56, height: 56,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       color: _kBlue.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.edit_outlined, color: _kBlue, size: 26),
+                    child: const Icon(Icons.edit_outlined,
+                        color: _kBlue, size: 26),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -220,12 +241,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _kBlue,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
                   onPressed: _shareTx,
                   child: const Text('نسخ',
-                      style: TextStyle(color: Colors.white, fontFamily: 'Cairo', fontSize: 16)),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Cairo',
+                          fontSize: 16)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -234,12 +259,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _kRed.withOpacity(0.85),
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
                   onPressed: _confirmDelete,
                   child: const Text('حذف',
-                      style: TextStyle(color: Colors.white, fontFamily: 'Cairo', fontSize: 16)),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Cairo',
+                          fontSize: 16)),
                 ),
               ),
             ]),
@@ -252,7 +281,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   // ─────────────────────────── Edit ───────────────────────────
   void _editTransaction() {
     final ctx = context;
-     showModalBottomSheet(
+    showModalBottomSheet(
       context: ctx,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -281,16 +310,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Future<void> _applyEdit(String? newDesc, double? newAmount) async {
     final type = _tx['type'] as String;
-    final id   = _tx['id'] as int;
-    final db   = await DatabaseHelper.instance.database;
+    final id = _tx['id'] as int;
+    final db = await DatabaseHelper.instance.database;
 
     if (type == 'CREDIT' && newAmount != null) {
       final diff = newAmount - _amount;
       await db.update(
         'credits',
         {
-          'montantTotal':    newAmount,
-          'montantRestant':  (_tx['montantRestant'] as num? ?? _amount) + diff,
+          'montantTotal': newAmount,
+          'montantRestant': (_tx['montantRestant'] as num? ?? _amount) + diff,
           if (newDesc != null) 'description': newDesc,
         },
         where: 'id = ?',
@@ -299,17 +328,23 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     } else if (type == 'PAYMENT' && newAmount != null) {
       // Revert old payment then apply new
       final oldMontant = _amount;
-      final creditId   = _tx['creditId'] as int;
+      final creditId = _tx['creditId'] as int;
       // Adjust credit montantRestant
-      final cRows = await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
+      final cRows =
+          await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
       if (cRows.isNotEmpty) {
         double restant = (cRows.first['montantRestant'] as num).toDouble();
-        restant += oldMontant;     // revert old
-        restant -= newAmount;      // apply new
+        restant += oldMontant; // revert old
+        restant -= newAmount; // apply new
         if (restant < 0) restant = 0;
-        await db.update('credits',
-            {'montantRestant': restant, 'statut': restant <= 0 ? 'SOLDE' : 'EN_COURS'},
-            where: 'id = ?', whereArgs: [creditId]);
+        await db.update(
+            'credits',
+            {
+              'montantRestant': restant,
+              'statut': restant <= 0 ? 'SOLDE' : 'EN_COURS'
+            },
+            where: 'id = ?',
+            whereArgs: [creditId]);
       }
       await db.update(
         'paiements',
@@ -321,22 +356,24 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       // Description only
       final table = type == 'CREDIT' ? 'credits' : 'paiements';
       final field = type == 'CREDIT' ? 'description' : 'note';
-      await db.update(table, {field: newDesc}, where: 'id = ?', whereArgs: [id]);
+      await db.update(table, {field: newDesc},
+          where: 'id = ?', whereArgs: [id]);
     }
 
     // Update client solde
     final clientId = await _getClientId();
-    if (clientId != null) await DatabaseHelper.instance.updateClientSolde(clientId);
+    if (clientId != null)
+      await DatabaseHelper.instance.updateClientSolde(clientId);
 
     setState(() {
-      if (newDesc   != null) _tx['description'] = newDesc;
-      if (newAmount != null) _tx['amount']      = newAmount;
+      if (newDesc != null) _tx['description'] = newDesc;
+      if (newAmount != null) _tx['amount'] = newAmount;
     });
     widget.onChanged();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم التعديل', style: TextStyle(fontFamily: 'Cairo')),
-              backgroundColor: _kGreen));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم التعديل', style: TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: _kGreen));
     }
   }
 
@@ -345,13 +382,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('حذف المعاملة', textAlign: TextAlign.right,
+        title: const Text('حذف المعاملة',
+            textAlign: TextAlign.right,
             style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-        content: const Text('واش متأكد من حذف هاد المعاملة؟', textAlign: TextAlign.right,
-            style: TextStyle(fontFamily: 'Cairo')),
+        content: const Text('واش متأكد من حذف هاد المعاملة؟',
+            textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Cairo')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false),
-              child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo'))),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child:
+                  const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo'))),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: _kRed),
@@ -366,8 +406,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Future<void> _deleteTransaction() async {
     final type = _tx['type'] as String;
-    final id   = _tx['id'] as int;
-    final db   = await DatabaseHelper.instance.database;
+    final id = _tx['id'] as int;
+    final db = await DatabaseHelper.instance.database;
 
     if (type == 'CREDIT') {
       // Delete credit (cascade deletes payments)
@@ -375,20 +415,23 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     } else {
       // Revert payment amount on credit
       final creditId = _tx['creditId'] as int;
-      final cRows = await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
+      final cRows =
+          await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
       if (cRows.isNotEmpty) {
-        double restant = (cRows.first['montantRestant'] as num).toDouble() + _amount;
-        final total    = (cRows.first['montantTotal']   as num).toDouble();
+        double restant =
+            (cRows.first['montantRestant'] as num).toDouble() + _amount;
+        final total = (cRows.first['montantTotal'] as num).toDouble();
         if (restant > total) restant = total;
-        await db.update('credits',
-            {'montantRestant': restant, 'statut': 'EN_COURS'},
+        await db.update(
+            'credits', {'montantRestant': restant, 'statut': 'EN_COURS'},
             where: 'id = ?', whereArgs: [creditId]);
       }
       await db.delete('paiements', where: 'id = ?', whereArgs: [id]);
     }
 
     final clientId = await _getClientId();
-    if (clientId != null) await DatabaseHelper.instance.updateClientSolde(clientId);
+    if (clientId != null)
+      await DatabaseHelper.instance.updateClientSolde(clientId);
 
     widget.onChanged();
     if (mounted) Navigator.pop(context);
@@ -396,25 +439,26 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Future<int?> _getClientId() async {
     final type = _tx['type'] as String;
-    final id   = _tx['id'] as int;
-    final db   = await DatabaseHelper.instance.database;
+    final id = _tx['id'] as int;
+    final db = await DatabaseHelper.instance.database;
     if (type == 'CREDIT') {
       final r = await db.query('credits', where: 'id = ?', whereArgs: [id]);
       return r.isEmpty ? null : r.first['clientId'] as int;
     } else {
       final creditId = _tx['creditId'] as int;
-      final r = await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
+      final r =
+          await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
       return r.isEmpty ? null : r.first['clientId'] as int;
     }
   }
 
   // ─────────────────────────── Share ───────────────────────────
   void _shareTx() {
-    final type    = _isCredit ? 'أخذت' : 'أعطيت';
-    final text    = 'العميل: ${widget.clientNom}\n'
-                  '$type: ${formatMontant(_amount)}\n'
-                  'الرصيد: ${formatMontant(_balance)}\n'
-                  'التاريخ: ${_formatFullDate(_dateStr)}';
+    final type = _isCredit ? 'أخذت' : 'أعطيت';
+    final text = 'العميل: ${widget.clientNom}\n'
+        '$type: ${formatMontant(_amount)}\n'
+        'الرصيد: ${formatMontant(_balance)}\n'
+        'التاريخ: ${_formatFullDate(_dateStr)}';
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('تم نسخ المعلومات', style: TextStyle(fontFamily: 'Cairo')),
@@ -432,14 +476,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         insetPadding: EdgeInsets.zero,
         child: Stack(children: [
           InteractiveViewer(
-            panEnabled: true, scaleEnabled: true,
+            panEnabled: true,
+            scaleEnabled: true,
             child: Center(child: Image.file(File(_img!), fit: BoxFit.contain)),
           ),
           Positioned(
-            top: 40, right: 10,
+            top: 40,
+            right: 10,
             child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close, color: Colors.white, size: 30)),
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close, color: Colors.white, size: 30)),
           ),
         ]),
       ),
@@ -467,19 +513,24 @@ class _EditTxSheetState extends State<_EditTxSheet> {
     super.initState();
     _amountCtrl = TextEditingController(
         text: (widget.tx['amount'] as num).toDouble().toStringAsFixed(2));
-    _descCtrl = TextEditingController(text: widget.tx['description'] as String? ?? '');
+    _descCtrl =
+        TextEditingController(text: widget.tx['description'] as String? ?? '');
   }
 
   @override
   void dispose() {
-    _amountCtrl.dispose(); _descCtrl.dispose(); super.dispose();
+    _amountCtrl.dispose();
+    _descCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCredit = widget.tx['type'] == 'CREDIT';
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -491,26 +542,34 @@ class _EditTxSheetState extends State<_EditTxSheet> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close)),
               Text('تعديل ${isCredit ? "الكريدي" : "الدفعة"}',
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Cairo')),
             ]),
             const SizedBox(height: 16),
             // Amount
             TextField(
               controller: _amountCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               textAlign: TextAlign.right,
               style: const TextStyle(fontFamily: 'Cairo', fontSize: 20),
               decoration: InputDecoration(
                 labelText: 'المبلغ',
                 labelStyle: const TextStyle(fontFamily: 'Cairo'),
                 prefixText: 'درهم  ',
-                prefixStyle: const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
-                filled: true, fillColor: const Color(0xFFF5F6FA),
+                prefixStyle:
+                    const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
+                filled: true,
+                fillColor: const Color(0xFFF5F6FA),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 12),
@@ -523,24 +582,31 @@ class _EditTxSheetState extends State<_EditTxSheet> {
               decoration: InputDecoration(
                 labelText: isCredit ? 'الوصف' : 'ملاحظة',
                 labelStyle: const TextStyle(fontFamily: 'Cairo'),
-                filled: true, fillColor: const Color(0xFFF5F6FA),
+                filled: true,
+                fillColor: const Color(0xFFF5F6FA),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 24),
             SizedBox(
-              width: double.infinity, height: 52,
+              width: double.infinity,
+              height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: _saving ? null : _save,
                 child: _saving
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text('حفظ التعديل',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Cairo')),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Cairo')),
               ),
             ),
           ],
