@@ -6,7 +6,6 @@ import '../models.dart';
 import '../utils/helpers.dart';
 import 'add_credit_sheet.dart';
 import 'add_paiement_sheet.dart';
-import 'add_cheque_sheet.dart';
 import 'transaction_detail_screen.dart';
 import 'client_settings_screen.dart';
 import 'package:flutter/services.dart';
@@ -299,7 +298,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
               ),
               child: Icon(
                 isCredit ? Icons.arrow_downward : Icons.arrow_upward,
-                color: isCredit ? Colors.white : Colors.grey.shade700,
+                color: isCredit ? Colors.white : (theme.brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade700),
                 size: 24,
               ),
             ),
@@ -557,12 +556,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
         );
         return;
       }
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => AddChequeSheet(creditId: open.first.id!, onSaved: _loadData),
-      );
+   
     });
   }
 
@@ -648,78 +642,86 @@ if (mounted) {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close)),
-                const Text('ملاحظة',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
-                        fontFamily: 'Cairo')),
-              ]),
-              const SizedBox(height: 12),
-              TextField(
-                controller: ctrl,
-                textAlign: TextAlign.right,
-                maxLines: 5,
-                autofocus: true,
-                style: const TextStyle(fontFamily: 'Cairo'),
-                decoration: InputDecoration(
-                  hintText: 'أضف ملاحظة عن هذا العميل...',
-                  hintStyle: const TextStyle(fontFamily: 'Cairo', color: Colors.grey),
-                  filled: true,
-                  fillColor: const Color(0xFFF5F6FA),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1B8A6B),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: () async {
-                    final note = ctrl.text.trim().isEmpty ? null : ctrl.text.trim();
-                    widget.client.notes = note;
-                    await DatabaseHelper.instance.updateClient(widget.client);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('تم حفظ الملاحظة ✅',
-                              style: TextStyle(fontFamily: 'Cairo')),
-                          backgroundColor: Color(0xFF1B8A6B)));
-                    }
-                  },
-                  child: const Text('حفظ',
-                      style: TextStyle(color: Colors.white, fontSize: 16,
-                          fontFamily: 'Cairo')),
-                ),
-              ),
-            ],
+      builder: (sheetCtx) {
+        final isDark = Theme.of(sheetCtx).brightness == Brightness.dark;
+        final sheetBg   = isDark ? const Color(0xFF1E1E2E) : Colors.white;
+        final fillColor = isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F6FA);
+        final textColor = isDark ? Colors.white : Colors.black87;
+
+        return Container(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetCtx).viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: sheetBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        ),
-      ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  IconButton(
+                      onPressed: () => Navigator.pop(sheetCtx),
+                      icon: Icon(Icons.close, color: textColor)),
+                  Text('ملاحظة',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Cairo',
+                          color: textColor)),
+                ]),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: ctrl,
+                  textAlign: TextAlign.right,
+                  maxLines: 5,
+                  autofocus: true,
+                  style: TextStyle(fontFamily: 'Cairo', color: textColor),
+                  decoration: InputDecoration(
+                    hintText: 'أضف ملاحظة عن هذا العميل...',
+                    hintStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey.shade500),
+                    filled: true,
+                    fillColor: fillColor,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1B8A6B),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () async {
+                      final note = ctrl.text.trim().isEmpty ? null : ctrl.text.trim();
+                      widget.client.notes = note;
+                      await DatabaseHelper.instance.updateClient(widget.client);
+                      if (mounted) {
+                        Navigator.pop(sheetCtx);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('تم حفظ الملاحظة ✅',
+                                style: TextStyle(fontFamily: 'Cairo')),
+                            backgroundColor: Color(0xFF1B8A6B)));
+                      }
+                    },
+                    child: const Text('حفظ',
+                        style: TextStyle(color: Colors.white, fontSize: 16,
+                            fontFamily: 'Cairo')),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
  }
-
-

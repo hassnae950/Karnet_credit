@@ -5,9 +5,9 @@ import '../models.dart';
 class AddClientSheet extends StatefulWidget {
   final VoidCallback onSaved;
   final String defaultType; // 'CLIENT' or 'SUPPLIER'
-  
+
   const AddClientSheet({
-    super.key, 
+    super.key,
     required this.onSaved,
     this.defaultType = 'CLIENT',
   });
@@ -22,7 +22,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
   final _adrCtrl = TextEditingController();
   final _companyCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
-  
+
   String _selectedType = 'CLIENT';
   int? _selectedCategoryId;
   List<Category> _categories = [];
@@ -49,7 +49,8 @@ class _AddClientSheetState extends State<AddClientSheet> {
   // جلب التصنيفات من قاعدة البيانات
   Future<void> _loadCategories() async {
     setState(() => _isLoadingCategories = true);
-    final cats = await DatabaseHelper.instance.getCategoriesByType(_selectedType);
+    final cats =
+        await DatabaseHelper.instance.getCategoriesByType(_selectedType);
     setState(() {
       _categories = cats;
       _isLoadingCategories = false;
@@ -58,11 +59,15 @@ class _AddClientSheetState extends State<AddClientSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // ← أضف هذا السطر في الأعلى
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(
+                24)), // ← هذا هو الصح        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         child: Padding(
@@ -80,7 +85,9 @@ class _AddClientSheetState extends State<AddClientSheet> {
                     icon: const Icon(Icons.close),
                   ),
                   Text(
-                    _selectedType == 'CLIENT' ? 'إضافة عميل جديد' : 'إضافة مورد جديد',
+                    _selectedType == 'CLIENT'
+                        ? 'إضافة عميل جديد'
+                        : 'إضافة مورد جديد',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -90,7 +97,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // نوع الحساب (زبون/مورد)
               Row(
                 children: [
@@ -104,7 +111,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // حقل الاسم
               _buildTextField(
                 controller: _nomCtrl,
@@ -113,7 +120,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 isRequired: true,
               ),
               const SizedBox(height: 12),
-              
+
               // حقل رقم الهاتف
               _buildTextField(
                 controller: _telCtrl,
@@ -122,7 +129,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 12),
-              
+
               // حقل الشركة
               _buildTextField(
                 controller: _companyCtrl,
@@ -130,7 +137,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 icon: Icons.business_outlined,
               ),
               const SizedBox(height: 12),
-              
+
               // حقل العنوان
               _buildTextField(
                 controller: _adrCtrl,
@@ -138,11 +145,11 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 icon: Icons.location_on_outlined,
               ),
               const SizedBox(height: 12),
-              
+
               // اختيار التصنيف
               _buildCategoryDropdown(),
               const SizedBox(height: 12),
-              
+
               // حقل الملاحظات
               _buildTextField(
                 controller: _notesCtrl,
@@ -151,7 +158,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
                 maxLines: 2,
               ),
               const SizedBox(height: 24),
-              
+
               // زر الحفظ
               SizedBox(
                 width: double.infinity,
@@ -236,7 +243,9 @@ class _AddClientSheetState extends State<AddClientSheet> {
         hintStyle: const TextStyle(fontFamily: 'Cairo'),
         prefixIcon: Icon(icon, color: const Color(0xFF1B8A6B)),
         filled: true,
-        fillColor: const Color(0xFFF5F6FA),
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF2C2C2C)
+            : const Color(0xFFF5F6FA),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -250,7 +259,7 @@ class _AddClientSheetState extends State<AddClientSheet> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6FA),
+color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -335,14 +344,16 @@ class _AddClientSheetState extends State<AddClientSheet> {
           nom: _nomCtrl.text.trim(),
           telephone: _telCtrl.text.trim().isEmpty ? null : _telCtrl.text.trim(),
           adresse: _adrCtrl.text.trim().isEmpty ? null : _adrCtrl.text.trim(),
-          company: _companyCtrl.text.trim().isEmpty ? null : _companyCtrl.text.trim(),
+          company: _companyCtrl.text.trim().isEmpty
+              ? null
+              : _companyCtrl.text.trim(),
           notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
           type: _selectedType,
           categoryId: _selectedCategoryId,
           dateCreation: DateTime.now(),
         ),
       );
-      
+
       widget.onSaved();
       if (mounted) Navigator.pop(context);
     } catch (e) {

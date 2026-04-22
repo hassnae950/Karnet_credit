@@ -111,10 +111,7 @@ class DatabaseHelper {
     
     if (oldVersion < 2) {
       try {
-        await db.execute('ALTER TABLE clients ADD COLUMN type TEXT DEFAULT "CLIENT"');
-        await db.execute('ALTER TABLE clients ADD COLUMN company TEXT');
-        await db.execute('ALTER TABLE clients ADD COLUMN notes TEXT');
-        await db.execute('ALTER TABLE clients ADD COLUMN solde REAL DEFAULT 0');
+        await db.execute('ALTER TABLE clients ADD COLUMN type TEXT DEFAULT "CLIENT"'); await db.execute('ALTER TABLE clients ADD COLUMN company TEXT'); await db.execute('ALTER TABLE clients ADD COLUMN notes TEXT');  await db.execute('ALTER TABLE clients ADD COLUMN solde REAL DEFAULT 0');
       } catch (e) {
         print('Error adding columns to clients: $e');
       }
@@ -122,11 +119,7 @@ class DatabaseHelper {
     
     if (oldVersion < 3) {
       try {
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS categories(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            type TEXT NOT NULL
+        await db.execute('''   CREATE TABLE IF NOT EXISTS categories(  id INTEGER PRIMARY KEY AUTOINCREMENT,    name TEXT NOT NULL,type TEXT NOT NULL
           )
         ''');
         await db.execute('ALTER TABLE clients ADD COLUMN categoryId INTEGER');
@@ -137,8 +130,7 @@ class DatabaseHelper {
     
     if (oldVersion < 4) {
       try {
-        await db.execute('ALTER TABLE credits ADD COLUMN imagePath TEXT');
-        await db.execute('ALTER TABLE paiements ADD COLUMN imagePath TEXT');
+        await db.execute('ALTER TABLE credits ADD COLUMN imagePath TEXT');  await db.execute('ALTER TABLE paiements ADD COLUMN imagePath TEXT');
       } catch (e) {
         print('Error adding imagePath columns: $e');
       }
@@ -505,16 +497,17 @@ Future<Map<String, dynamic>> exportAllData() async {
         where: 'creditId = ?',
         whereArgs: [cr['id']],
       );
-      for (final p in pRows) {
-        all.add({
-          'type': 'PAYMENT',
-          'id': p['id'],
-          'amount': (p['montant'] as num).toDouble(),
-          'date': p['datePaiement'] as String,
-          'description': p['note'],
-          'imagePath': p['imagePath'],
-        });
-      }
+for (final p in pRows) {
+  all.add({
+    'type': 'PAYMENT',
+    'id': p['id'],
+    'creditId': cr['id'],    // ← زيد هاد السطر فقط
+    'amount': (p['montant'] as num).toDouble(),
+    'date': p['datePaiement'] as String,
+    'description': p['note'],
+    'imagePath': p['imagePath'],
+  });
+}
     }
 
     // Sort chronologically

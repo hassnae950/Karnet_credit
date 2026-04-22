@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../database_helper.dart';
 import '../utils/helpers.dart';
+//formulaire dyal 2a3tayt
+
 
 const _kPrimary = Color(0xFF1B8A6B);
 const _kGreen   = Color(0xFF388E3C);
 const _kRed     = Color(0xFFD32F2F);
 
 class AddPaiementSheet extends StatefulWidget {
-  /// ✅ Takes clientId + totalRestant (not a single Credit)
-  /// Payment is distributed FIFO across all open credits
   final int clientId;
   final double totalRestant;
   final VoidCallback onSaved;
@@ -35,7 +35,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
   @override
   void dispose() { _noteCtrl.dispose(); super.dispose(); }
 
-  // ── Calculator ──
   void _onKey(String k) {
     setState(() {
       if (k == 'C') { _amount = '0'; return; }
@@ -76,13 +75,17 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final montant = double.tryParse(_amount) ?? 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg   = isDark ? const Color(0xFF1E1E2E) : Colors.white;
+    final fillColor = isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F6FA);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final montant   = double.tryParse(_amount) ?? 0;
 
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: sheetBg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -92,9 +95,17 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
           children: [
             // Title
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-              const Text('تسجيل دفعة',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(Icons.close, color: textColor),
+              ),
+              Text('تسجيل دفعة',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Cairo',
+                    color: textColor,
+                  )),
             ]),
 
             // Remaining balance
@@ -103,7 +114,11 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(12)),
+                color: isDark
+                    ? _kRed.withOpacity(0.15)
+                    : const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Text(
                 'المبلغ المتبقي: ${formatMontant(widget.totalRestant)}',
                 textAlign: TextAlign.right,
@@ -116,22 +131,27 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6FA), borderRadius: BorderRadius.circular(16)),
+                color: fillColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('درهم',
                       style: TextStyle(color: _kGreen, fontFamily: 'Cairo', fontSize: 16)),
                   Text(_amount,
-                      style: const TextStyle(
-                          fontSize: 36, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                      style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Cairo',
+                          color: textColor)),
                 ],
               ),
             ),
             const SizedBox(height: 12),
 
             // Calculator pad
-            _calcPad(),
+            _calcPad(isDark: isDark, fillColor: fillColor, textColor: textColor),
             const SizedBox(height: 12),
 
             // Note
@@ -139,11 +159,12 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
               controller: _noteCtrl,
               textAlign: TextAlign.right,
               maxLines: 2,
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: TextStyle(fontFamily: 'Cairo', color: textColor),
               decoration: InputDecoration(
                 hintText: 'ملاحظة (اختياري)',
-                hintStyle: const TextStyle(fontFamily: 'Cairo'),
-                filled: true, fillColor: const Color(0xFFF5F6FA),
+                hintStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey.shade500),
+                filled: true,
+                fillColor: fillColor,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               ),
@@ -157,7 +178,8 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                 icon: const Icon(Icons.photo_library),
                 label: const Text('معرض', style: TextStyle(fontFamily: 'Cairo')),
                 style: OutlinedButton.styleFrom(
-                    foregroundColor: _kGreen, side: const BorderSide(color: _kGreen)),
+                    foregroundColor: _kGreen,
+                    side: const BorderSide(color: _kGreen)),
               )),
               const SizedBox(width: 8),
               Expanded(child: OutlinedButton.icon(
@@ -165,7 +187,8 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('كاميرا', style: TextStyle(fontFamily: 'Cairo')),
                 style: OutlinedButton.styleFrom(
-                    foregroundColor: _kGreen, side: const BorderSide(color: _kGreen)),
+                    foregroundColor: _kGreen,
+                    side: const BorderSide(color: _kGreen)),
               )),
             ]),
 
@@ -221,7 +244,11 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
     );
   }
 
-  Widget _calcPad() {
+  Widget _calcPad({
+    required bool isDark,
+    required Color fillColor,
+    required Color textColor,
+  }) {
     final rows = [
       ['7', '8', '9'],
       ['4', '5', '6'],
@@ -229,6 +256,8 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
       ['00', '0', 'C'],
       ['⌫', '.', ''],
     ];
+    final borderColor = isDark ? Colors.grey.shade700 : Colors.grey.shade200;
+
     return Column(
       children: rows.map((row) => Row(
         children: row.map((k) => k.isEmpty
@@ -242,19 +271,19 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
                         color: k == 'C'
-                            ? const Color(0xFFFFEBEE)
+                            ? (isDark ? _kRed.withOpacity(0.2) : const Color(0xFFFFEBEE))
                             : k == '⌫'
-                                ? const Color(0xFFF5F6FA)
-                                : Colors.white,
+                                ? fillColor
+                                : (isDark ? const Color(0xFF2C2C3E) : Colors.white),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: borderColor),
                       ),
                       child: Center(
                         child: Text(k,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: k == 'C' ? _kRed : Colors.black87,
+                              color: k == 'C' ? _kRed : textColor,
                             )),
                       ),
                     ),
@@ -275,7 +304,6 @@ class _AddPaiementSheetState extends State<AddPaiementSheet> {
     }
     setState(() => _saving = true);
     try {
-      // ✅ FIFO: distributes across open credits oldest-first
       await DatabaseHelper.instance.createPaiementFIFO(
         widget.clientId,
         montant,
