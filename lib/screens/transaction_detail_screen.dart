@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../database_helper.dart';
 import '../utils/helpers.dart';
+import '../utils/app_translations.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
-const _kGreen = Color(0xFF388E3C);
-const _kRed = Color(0xFFD32F2F);
-const _kBlue = Color(0xFF1976D2);
+const _kGreen   = Color(0xFF388E3C);
+const _kRed     = Color(0xFFD32F2F);
+const _kBlue    = Color(0xFF1976D2);
 
 class TransactionDetailScreen extends StatefulWidget {
   final Map<String, dynamic> tx;
@@ -35,47 +36,21 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     _tx = Map<String, dynamic>.from(widget.tx);
   }
 
-  bool get _isCredit => _tx['type'] == 'CREDIT';
-  double get _amount => (_tx['amount'] as num).toDouble();
-  double get _balance => (_tx['balance'] as num).toDouble();
-  String get _dateStr => _tx['date'] as String;
-  String? get _desc => _tx['description'] as String?;
-  String? get _img => _tx['imagePath'] as String?;
-
-  String _formatFullDate(String iso) {
-    final d = DateTime.parse(iso).toLocal();
-    final now = DateTime.now();
-    final h = d.hour.toString().padLeft(2, '0');
-    final m = d.minute.toString().padLeft(2, '0');
-    final today = DateTime(now.year, now.month, now.day);
-    final txDay = DateTime(d.year, d.month, d.day);
-    const mo = [
-      '',
-      'يناير',
-      'فبراير',
-      'مارس',
-      'أبريل',
-      'مايو',
-      'يونيو',
-      'يوليو',
-      'أغسطس',
-      'سبتمبر',
-      'أكتوبر',
-      'نوفمبر',
-      'ديسمبر'
-    ];
-    if (txDay == today) return 'اليوم ساعة $h:$m';
-    return '${d.day} ${mo[d.month]} ${d.year} ساعة $h:$m';
-  }
+  bool    get _isCredit => _tx['type'] == 'CREDIT';
+  double  get _amount   => (_tx['amount']  as num).toDouble();
+  double  get _balance  => (_tx['balance'] as num).toDouble();
+  String  get _dateStr  => _tx['date'] as String;
+  String? get _desc     => _tx['description'] as String?;
+  String? get _img      => _tx['imagePath']   as String?;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black87;
-    final subTextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
-    final cardBg = isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF5F6FA);
-    final badgeBg = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
-    final badgeTextColor = isDark ? Colors.grey.shade400 : Colors.grey;
+    final isDark        = Theme.of(context).brightness == Brightness.dark;
+    final textColor     = isDark ? Colors.white          : Colors.black87;
+    final subTextColor  = isDark ? Colors.grey.shade400  : Colors.grey.shade600;
+    final cardBg        = isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF5F6FA);
+    final badgeBg       = isDark ? Colors.grey.shade800  : Colors.grey.shade200;
+    final badgeTextColor= isDark ? Colors.grey.shade400  : Colors.grey;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -107,9 +82,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Date
+            // ── Date ─────────────────────────────────────────────────────────
             Text(
-              _formatFullDate(_dateStr),
+              Tr.formatTxDate(_dateStr),
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Cairo',
@@ -118,17 +93,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 6),
 
-            // Type label
+            // ── Type label ───────────────────────────────────────────────────
             Text(
-              _isCredit ? 'أخذت' : 'أعطيت',
+              _isCredit ? Tr.s('took_label') : Tr.s('gave_label'),
               style: TextStyle(
-                  color: subTextColor,
-                  fontFamily: 'Cairo',
-                  fontSize: 13),
+                  color: subTextColor, fontFamily: 'Cairo', fontSize: 13),
             ),
             const SizedBox(height: 8),
 
-            // Amount
+            // ── Amount ───────────────────────────────────────────────────────
             Text(
               formatMontant(_amount),
               style: TextStyle(
@@ -141,9 +114,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Balance chip
+            // ── Balance chip ─────────────────────────────────────────────────
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -152,7 +125,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'الرصيد ${formatMontant(_balance)}',
+                  '${Tr.s('balance')} ${formatMontant(_balance)}',
                   style: const TextStyle(
                       color: _kGreen, fontFamily: 'Cairo', fontSize: 13),
                 ),
@@ -160,7 +133,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Description / note
+            // ── Description ──────────────────────────────────────────────────
             if (_desc != null && _desc!.isNotEmpty) ...[
               Container(
                 width: double.infinity,
@@ -171,7 +144,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 ),
                 child: Text(
                   _desc!,
-                  textAlign: TextAlign.right,
+                  textAlign: Tr.textAlignStart,
                   style: TextStyle(
                       fontFamily: 'Cairo', fontSize: 14, color: textColor),
                 ),
@@ -179,7 +152,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               const SizedBox(height: 12),
             ],
 
-            // Image thumbnail
+            // ── Image ────────────────────────────────────────────────────────
             if (_img != null && _img!.isNotEmpty)
               GestureDetector(
                 onTap: _showFullImage,
@@ -201,15 +174,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 ),
               ),
 
-            // "Recorded" badge
+            // ── "Recorded" badge ─────────────────────────────────────────────
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: badgeBg,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'مسجلة',
+                Tr.s('recorded'),
                 style: TextStyle(
                     color: badgeTextColor,
                     fontFamily: 'Cairo',
@@ -219,9 +193,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
             const Spacer(),
 
-            // Edit button (circle)
+            // ── Edit button ──────────────────────────────────────────────────
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Column(children: [
                 GestureDetector(
                   onTap: _editTransaction,
@@ -237,7 +211,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text('تعديل',
+                Text(Tr.s('edit'),
                     style: TextStyle(
                         color: subTextColor,
                         fontFamily: 'Cairo',
@@ -246,7 +220,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Bottom buttons
+            // ── Copy / Delete buttons ────────────────────────────────────────
             Row(children: [
               Expanded(
                 child: ElevatedButton(
@@ -258,8 +232,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     elevation: 0,
                   ),
                   onPressed: _shareTx,
-                  child: const Text('نسخ',
-                      style: TextStyle(
+                  child: Text(Tr.s('copy'),
+                      style: const TextStyle(
                           color: Colors.white,
                           fontFamily: 'Cairo',
                           fontSize: 16)),
@@ -276,8 +250,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     elevation: 0,
                   ),
                   onPressed: _confirmDelete,
-                  child: const Text('حذف',
-                      style: TextStyle(
+                  child: Text(Tr.s('delete'),
+                      style: const TextStyle(
                           color: Colors.white,
                           fontFamily: 'Cairo',
                           fontSize: 16)),
@@ -290,63 +264,52 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     );
   }
 
-  // ─────────────────────────── Edit ───────────────────────────
+  // ── Edit ────────────────────────────────────────────────────────────────────
   void _editTransaction() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EditTxSheet(
-        tx: _tx,
-        onSaved: _applyEdit,
-      ),
+      builder: (_) => _EditTxSheet(tx: _tx, onSaved: _applyEdit),
     );
   }
 
   Future<void> _applyEdit(String? newDesc, double? newAmount) async {
     final type = _tx['type'] as String;
-    final id = _tx['id'] as int;
-    final db = await DatabaseHelper.instance.database;
+    final id   = _tx['id']   as int;
+    final db   = await DatabaseHelper.instance.database;
 
     if (type == 'CREDIT' && newAmount != null) {
       final diff = newAmount - _amount;
       await db.update(
         'credits',
         {
-          'montantTotal': newAmount,
+          'montantTotal':   newAmount,
           'montantRestant': (_tx['montantRestant'] as num? ?? _amount) + diff,
           if (newDesc != null) 'description': newDesc,
         },
-        where: 'id = ?',
-        whereArgs: [id],
+        where: 'id = ?', whereArgs: [id],
       );
     } else if (type == 'PAYMENT' && newAmount != null) {
-      final oldMontant = _amount;
       final creditId = _tx['creditId'] as int;
-      final cRows =
-          await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
+      final cRows = await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
       if (cRows.isNotEmpty) {
         double restant = (cRows.first['montantRestant'] as num).toDouble();
-        restant += oldMontant;
+        restant += _amount;
         restant -= newAmount;
         if (restant < 0) restant = 0;
-        await db.update(
-            'credits',
-            {'montantRestant': restant},
-            where: 'id = ?',
-            whereArgs: [creditId]);
+        await db.update('credits', {'montantRestant': restant},
+            where: 'id = ?', whereArgs: [creditId]);
       }
       await db.update(
         'paiements',
         {'montant': newAmount, if (newDesc != null) 'note': newDesc},
-        where: 'id = ?',
-        whereArgs: [id],
+        where: 'id = ?', whereArgs: [id],
       );
     } else if (newDesc != null) {
       final table = type == 'CREDIT' ? 'credits' : 'paiements';
       final field = type == 'CREDIT' ? 'description' : 'note';
-      await db.update(table, {field: newDesc},
-          where: 'id = ?', whereArgs: [id]);
+      await db.update(table, {field: newDesc}, where: 'id = ?', whereArgs: [id]);
     }
 
     final clientId = await _getClientId();
@@ -354,35 +317,40 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       await DatabaseHelper.instance.updateClientSolde(clientId);
 
     setState(() {
-      if (newDesc != null) _tx['description'] = newDesc;
-      if (newAmount != null) _tx['amount'] = newAmount;
+      if (newDesc   != null) _tx['description'] = newDesc;
+      if (newAmount != null) _tx['amount']       = newAmount;
     });
     widget.onChanged();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('تم التعديل', style: TextStyle(fontFamily: 'Cairo')),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(Tr.s('edited'),
+              style: const TextStyle(fontFamily: 'Cairo')),
           backgroundColor: _kGreen));
     }
   }
 
-  // ─────────────────────────── Delete ───────────────────────────
+  // ── Delete ───────────────────────────────────────────────────────────────────
   Future<void> _confirmDelete() async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('حذف المعاملة',
-            textAlign: TextAlign.right,
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-        content: const Text('واش متأكد من حذف هاد المعاملة؟',
-            textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Cairo')),
+      builder: (ctx) => AlertDialog(
+        title: Text(Tr.s('delete_tx'),
+            textAlign: Tr.textAlignStart,
+            style: const TextStyle(
+                fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+        content: Text(Tr.s('confirm_delete_tx'),
+            textAlign: Tr.textAlignStart,
+            style: const TextStyle(fontFamily: 'Cairo')),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(dialogCtx, false),
-              child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo'))),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(Tr.s('cancel'),
+                  style: const TextStyle(fontFamily: 'Cairo'))),
           TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, true),
+            onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: _kRed),
-            child: const Text('حذف', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(Tr.s('delete'),
+                style: const TextStyle(fontFamily: 'Cairo')),
           ),
         ],
       ),
@@ -392,11 +360,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   }
 
   Future<void> _deleteTransaction() async {
-    final type = _tx['type'] as String;
-    final id = _tx['id'] as int;
-    final db = await DatabaseHelper.instance.database;
-
-    // ✅ Get clientId BEFORE deleting (after delete the row is gone)
+    final type     = _tx['type'] as String;
+    final id       = _tx['id']   as int;
+    final db       = await DatabaseHelper.instance.database;
     final clientId = await _getClientId();
 
     if (type == 'CREDIT') {
@@ -410,8 +376,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             (cRows.first['montantRestant'] as num).toDouble() + _amount;
         final total = (cRows.first['montantTotal'] as num).toDouble();
         if (restant > total) restant = total;
-        await db.update(
-            'credits', {'montantRestant': restant},
+        await db.update('credits', {'montantRestant': restant},
             where: 'id = ?', whereArgs: [creditId]);
       }
       await db.delete('paiements', where: 'id = ?', whereArgs: [id]);
@@ -426,8 +391,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Future<int?> _getClientId() async {
     final type = _tx['type'] as String;
-    final id = _tx['id'] as int;
-    final db = await DatabaseHelper.instance.database;
+    final id   = _tx['id']   as int;
+    final db   = await DatabaseHelper.instance.database;
     if (type == 'CREDIT') {
       final r = await db.query('credits', where: 'id = ?', whereArgs: [id]);
       return r.isEmpty ? null : r.first['clientId'] as int;
@@ -439,21 +404,23 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     }
   }
 
-  // ─────────────────────────── Share ───────────────────────────
+  // ── Share / copy ─────────────────────────────────────────────────────────────
   void _shareTx() {
-    final type = _isCredit ? 'أخذت' : 'أعطيت';
-    final text = 'العميل: ${widget.clientNom}\n'
-        '$type: ${formatMontant(_amount)}\n'
-        'الرصيد: ${formatMontant(_balance)}\n'
-        'التاريخ: ${_formatFullDate(_dateStr)}';
+    final typeLabel = _isCredit ? Tr.s('took_label') : Tr.s('gave_label');
+    final text =
+        '${Tr.s('client')}: ${widget.clientNom}\n'
+        '$typeLabel: ${formatMontant(_amount)}\n'
+        '${Tr.s('balance')}: ${formatMontant(_balance)}\n'
+        '${Tr.s('date_label')}: ${Tr.formatTxDate(_dateStr)}';
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('تم نسخ المعلومات', style: TextStyle(fontFamily: 'Cairo')),
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(Tr.s('info_copied'),
+          style: const TextStyle(fontFamily: 'Cairo')),
       backgroundColor: _kBlue,
     ));
   }
 
-  // ─────────────────────────── Full image ───────────────────────────
+  // ── Full image ───────────────────────────────────────────────────────────────
   void _showFullImage() {
     if (_img == null) return;
     showDialog(
@@ -465,14 +432,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           InteractiveViewer(
             panEnabled: true,
             scaleEnabled: true,
-            child: Center(child: Image.file(File(_img!), fit: BoxFit.contain)),
+            child:
+                Center(child: Image.file(File(_img!), fit: BoxFit.contain)),
           ),
           Positioned(
             top: 40,
             right: 10,
             child: IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close, color: Colors.white, size: 30)),
+                icon: const Icon(Icons.close,
+                    color: Colors.white, size: 30)),
           ),
         ]),
       ),
@@ -480,7 +449,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   }
 }
 
-// ──────────────────────────── Edit Sheet ────────────────────────────
+// ── Edit sheet ──────────────────────────────────────────────────────────────────
 class _EditTxSheet extends StatefulWidget {
   final Map<String, dynamic> tx;
   final Future<void> Function(String? desc, double? amount) onSaved;
@@ -500,8 +469,8 @@ class _EditTxSheetState extends State<_EditTxSheet> {
     super.initState();
     _amountCtrl = TextEditingController(
         text: (widget.tx['amount'] as num).toDouble().toStringAsFixed(2));
-    _descCtrl =
-        TextEditingController(text: widget.tx['description'] as String? ?? '');
+    _descCtrl = TextEditingController(
+        text: widget.tx['description'] as String? ?? '');
   }
 
   @override
@@ -513,12 +482,11 @@ class _EditTxSheetState extends State<_EditTxSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final sheetBg = isDark ? const Color(0xFF1E1E2E) : Colors.white;
-    final fillColor =
-        isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F6FA);
+    final isDark    = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg   = isDark ? const Color(0xFF1E1E2E) : Colors.white;
+    final fillColor = isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F6FA);
     final textColor = isDark ? Colors.white : Colors.black87;
-    final isCredit = widget.tx['type'] == 'CREDIT';
+    final isCredit  = widget.tx['type'] == 'CREDIT';
 
     return Container(
       padding:
@@ -533,19 +501,23 @@ class _EditTxSheetState extends State<_EditTxSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            // Header
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: Icon(Icons.close, color: textColor)),
-              Text('تعديل ${isCredit ? "الكريدي" : "الدفعة"}',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Cairo',
-                      color: textColor)),
+              Text(
+                isCredit ? Tr.s('edit_credit') : Tr.s('edit_payment'),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Cairo',
+                    color: textColor),
+              ),
             ]),
             const SizedBox(height: 16),
-            // Amount
+
+            // Amount field
             TextField(
               controller: _amountCtrl,
               keyboardType:
@@ -554,9 +526,10 @@ class _EditTxSheetState extends State<_EditTxSheet> {
               style: TextStyle(
                   fontFamily: 'Cairo', fontSize: 20, color: textColor),
               decoration: InputDecoration(
-                labelText: 'المبلغ',
-                labelStyle: TextStyle(fontFamily: 'Cairo', color: textColor),
-                prefixText: 'درهم  ',
+                labelText: Tr.s('amount'),
+                labelStyle:
+                    TextStyle(fontFamily: 'Cairo', color: textColor),
+                prefixText: '${Tr.s('currency')}  ',
                 prefixStyle:
                     const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
                 filled: true,
@@ -567,16 +540,18 @@ class _EditTxSheetState extends State<_EditTxSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            // Description/note
+
+            // Description/note field
             TextField(
               controller: _descCtrl,
-              textAlign: TextAlign.right,
+              textAlign: Tr.textAlignStart,
               maxLines: 2,
-              style:
-                  TextStyle(fontFamily: 'Cairo', color: textColor),
+              style: TextStyle(fontFamily: 'Cairo', color: textColor),
               decoration: InputDecoration(
-                labelText: isCredit ? 'الوصف' : 'ملاحظة',
-                labelStyle: TextStyle(fontFamily: 'Cairo', color: textColor),
+                labelText:
+                    isCredit ? Tr.s('description') : Tr.s('note_optional'),
+                labelStyle:
+                    TextStyle(fontFamily: 'Cairo', color: textColor),
                 filled: true,
                 fillColor: fillColor,
                 border: OutlineInputBorder(
@@ -585,6 +560,8 @@ class _EditTxSheetState extends State<_EditTxSheet> {
               ),
             ),
             const SizedBox(height: 24),
+
+            // Save button
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -597,8 +574,8 @@ class _EditTxSheetState extends State<_EditTxSheet> {
                 onPressed: _saving ? null : _save,
                 child: _saving
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('حفظ التعديل',
-                        style: TextStyle(
+                    : Text(Tr.s('save_edit'),
+                        style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontFamily: 'Cairo')),
@@ -611,23 +588,26 @@ class _EditTxSheetState extends State<_EditTxSheet> {
   }
 
   Future<void> _save() async {
-    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', '.'));
+    final amount =
+        double.tryParse(_amountCtrl.text.replaceAll(',', '.'));
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('دخل مبلغ صحيح', style: TextStyle(fontFamily: 'Cairo')),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(Tr.s('enter_valid_amount'),
+              style: const TextStyle(fontFamily: 'Cairo')),
           backgroundColor: Colors.red));
       return;
     }
     setState(() => _saving = true);
     try {
-      final desc = _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
+      final desc =
+          _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
       await widget.onSaved(desc, amount);
-      // Pop the sheet from its own context after save completes
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('خطأ: $e', style: const TextStyle(fontFamily: 'Cairo')),
+            content: Text('${Tr.s('error_prefix')} $e',
+                style: const TextStyle(fontFamily: 'Cairo')),
             backgroundColor: Colors.red));
       }
     } finally {

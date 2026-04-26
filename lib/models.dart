@@ -28,6 +28,43 @@ class Category {
   }
 }
 
+/// نموذج المستخدم
+class User {
+  int? id;
+  String? username;        // اختياري للحسابات المسجلة
+  String? phone;           // رقم الهاتف
+  String? password;        // كلمة المرور (مشفرة في الواقع)
+  DateTime dateCreation;
+
+  User({
+    this.id,
+    this.username,
+    this.phone,
+    this.password,
+    required this.dateCreation,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'username': username,
+      'phone': phone,
+      'password': password,
+      'dateCreation': dateCreation.toIso8601String(),
+    };
+  }
+
+  factory User.fromMap(Map<String, dynamic> map) {
+    return User(
+      id: map['id'],
+      username: map['username'],
+      phone: map['phone'],
+      password: map['password'],
+      dateCreation: DateTime.parse(map['dateCreation']),
+    );
+  }
+}
+
 class Client {
   int? id;
   String nom;
@@ -98,7 +135,7 @@ class Credit {
   double montantRestant;
   DateTime dateCredit;
   String? description;
-  String? imagePath;  // حقل الصورة
+  String? imagePath;
 
   Credit({
     this.id,
@@ -148,7 +185,7 @@ class Paiement {
   double montant;
   DateTime datePaiement;
   String? note;
-  String? imagePath;  // حقل الصورة
+  String? imagePath;
 
   Paiement({
     this.id,
