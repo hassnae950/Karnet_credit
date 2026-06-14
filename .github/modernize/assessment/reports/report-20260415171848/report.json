@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "producer": "Java AppCAT CLI",
+  "metadata": {
+    "analysisStartTime": "2026-04-15T16:18:48.392Z",
+    "analysisEndTime": "1970-01-01T00:00:00.000Z",
+    "privacyMode": "Protected",
+    "privacyModeHelpUrl": "https://aka.ms/appmod-privacy-mode",
+    "targetIds": [],
+    "targetDisplayNames": [],
+    "capabilities": [
+      "openjdk21"
+    ],
+    "os": [],
+    "id": "20260415171848",
+    "name": "Report_20260415171848",
+    "status": "running",
+    "domains": [
+      "security"
+    ],
+    "mode": "issue-only"
+  },
+  "summary": {},
+  "projects": [],
+  "rules": {},
+  "security": []
+}

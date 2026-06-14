@@ -1,0 +1,44 @@
+﻿# Flutter/Dart build files
+build/
+.dart_tool/
+.pub/
+.pub-cache/
+*.lock
+*.log
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+
+# iOS
+ios/build/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# Generated files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# APK/AAB/Shared objects
+*.apk
+*.aab
+*.so
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+test/.test_cache
+
+# Environment
+.env
+*.key

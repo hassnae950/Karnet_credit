@@ -1,0 +1,1542 @@
+[
+  {
+    "id": ".dart_tool\\dartpad\\web_plugin_registrant.dart",
+    "path": ".dart_tool\\dartpad\\web_plugin_registrant.dart",
+    "extension": ".dart",
+    "size": 135,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\extension_discovery\\devtools.json",
+    "path": ".dart_tool\\extension_discovery\\devtools.json",
+    "extension": ".json",
+    "size": 89,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\extension_discovery\\vs_code.json",
+    "path": ".dart_tool\\extension_discovery\\vs_code.json",
+    "extension": ".json",
+    "size": 89,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\.filecache",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\.filecache",
+    "extension": "",
+    "size": 162992,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\app.dill",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\app.dill",
+    "extension": ".dill",
+    "size": 63502232,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\dart_build.d",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\dart_build.d",
+    "extension": ".d",
+    "size": 386,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\dart_build.stamp",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\dart_build.stamp",
+    "extension": ".stamp",
+    "size": 724,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\dart_build_result.json",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\dart_build_result.json",
+    "extension": ".json",
+    "size": 413,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\debug_android_application.stamp",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\debug_android_application.stamp",
+    "extension": ".stamp",
+    "size": 8099,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\flutter_assets.d",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\flutter_assets.d",
+    "extension": ".d",
+    "size": 7144,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\gen_dart_plugin_registrant.stamp",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\gen_dart_plugin_registrant.stamp",
+    "extension": ".stamp",
+    "size": 201,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\gen_localizations.stamp",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\gen_localizations.stamp",
+    "extension": ".stamp",
+    "size": 26,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\install_code_assets.d",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\install_code_assets.d",
+    "extension": ".d",
+    "size": 125,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\install_code_assets.stamp",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\install_code_assets.stamp",
+    "extension": ".stamp",
+    "size": 451,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\kernel_snapshot_program.d",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\kernel_snapshot_program.d",
+    "extension": ".d",
+    "size": 99745,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\kernel_snapshot_program.stamp",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\kernel_snapshot_program.stamp",
+    "extension": ".stamp",
+    "size": 102433,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\native_assets.json",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\native_assets.json",
+    "extension": ".json",
+    "size": 45,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\outputs.json",
+    "path": ".dart_tool\\flutter_build\\401ee0539c7d97f21edcb69077732e79\\outputs.json",
+    "extension": ".json",
+    "size": 1414,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\flutter_build\\dart_plugin_registrant.dart",
+    "path": ".dart_tool\\flutter_build\\dart_plugin_registrant.dart",
+    "extension": ".dart",
+    "size": 3456,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\.lock",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\.lock",
+    "extension": "",
+    "size": 176,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\dependencies.dependencies_hash_file.json",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\dependencies.dependencies_hash_file.json",
+    "extension": ".json",
+    "size": 401,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\hook.dependencies_hash_file.json",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\hook.dependencies_hash_file.json",
+    "extension": ".json",
+    "size": 352,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\hook.dill",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\hook.dill",
+    "extension": ".dill",
+    "size": 11031248,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\hook.dill.d",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\hook.dill.d",
+    "extension": ".d",
+    "size": 25633,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\input.json",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\input.json",
+    "extension": ".json",
+    "size": 1226,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\output.json",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\output.json",
+    "extension": ".json",
+    "size": 95,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\stderr.txt",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\stderr.txt",
+    "extension": ".txt",
+    "size": 0,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\stdout.txt",
+    "path": ".dart_tool\\hooks_runner\\objective_c\\f84ba87baf\\stdout.txt",
+    "extension": ".txt",
+    "size": 2291,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\hooks_runner\\shared\\objective_c\\.lock",
+    "path": ".dart_tool\\hooks_runner\\shared\\objective_c\\.lock",
+    "extension": "",
+    "size": 176,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\package_config.json",
+    "path": ".dart_tool\\package_config.json",
+    "extension": ".json",
+    "size": 13059,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\package_graph.json",
+    "path": ".dart_tool\\package_graph.json",
+    "extension": ".json",
+    "size": 10423,
+    "language": "unknown"
+  },
+  {
+    "id": ".dart_tool\\version",
+    "path": ".dart_tool\\version",
+    "extension": "",
+    "size": 6,
+    "language": "unknown"
+  },
+  {
+    "id": ".flutter-plugins-dependencies",
+    "path": ".flutter-plugins-dependencies",
+    "extension": "",
+    "size": 3380,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\.gitignore",
+    "path": ".github\\appmod\\assessment\\.gitignore",
+    "extension": "",
+    "size": 36,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\.gitignore",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\.gitignore",
+    "extension": "",
+    "size": 2,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cve_assessment_result.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cve_assessment_result.json",
+    "extension": ".json",
+    "size": 276,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\code-quality.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\code-quality.json",
+    "extension": ".json",
+    "size": 3381,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\concurrency-synchronization.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\concurrency-synchronization.json",
+    "extension": ".json",
+    "size": 1363,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\credentials-secrets.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\credentials-secrets.json",
+    "extension": ".json",
+    "size": 1450,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\file-path-security.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\file-path-security.json",
+    "extension": ".json",
+    "size": 1124,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\injection-attacks.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\injection-attacks.json",
+    "extension": ".json",
+    "size": 2941,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\memory-safety.json",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\cweChecklist\\memory-safety.json",
+    "extension": ".json",
+    "size": 3133,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\engines\\ai\\security-assessment-plan.md",
+    "path": ".github\\appmod\\assessment\\engines\\ai\\security-assessment-plan.md",
+    "extension": ".md",
+    "size": 5944,
+    "language": "unknown"
+  },
+  {
+    "id": ".github\\appmod\\assessment\\reports\\report-20260415171848\\report.json",
+    "path": ".github\\appmod\\assessment\\reports\\report-20260415171848\\report.json",
+    "extension": ".json",
+    "size": 614,
+    "language": "unknown"
+  },
+  {
+    "id": ".gitignore",
+    "path": ".gitignore",
+    "extension": "",
+    "size": 748,
+    "language": "unknown"
+  },
+  {
+    "id": ".idea\\libraries\\Dart_SDK.xml",
+    "path": ".idea\\libraries\\Dart_SDK.xml",
+    "extension": ".xml",
+    "size": 1003,
+    "language": "unknown"
+  },
+  {
+    "id": ".idea\\libraries\\KotlinJavaRuntime.xml",
+    "path": ".idea\\libraries\\KotlinJavaRuntime.xml",
+    "extension": ".xml",
+    "size": 614,
+    "language": "unknown"
+  },
+  {
+    "id": ".idea\\modules.xml",
+    "path": ".idea\\modules.xml",
+    "extension": ".xml",
+    "size": 449,
+    "language": "unknown"
+  },
+  {
+    "id": ".idea\\runConfigurations\\main_dart.xml",
+    "path": ".idea\\runConfigurations\\main_dart.xml",
+    "extension": ".xml",
+    "size": 276,
+    "language": "unknown"
+  },
+  {
+    "id": ".idea\\workspace.xml",
+    "path": ".idea\\workspace.xml",
+    "extension": ".xml",
+    "size": 1553,
+    "language": "unknown"
+  },
+  {
+    "id": ".metadata",
+    "path": ".metadata",
+    "extension": "",
+    "size": 968,
+    "language": "unknown"
+  },
+  {
+    "id": ".vscode\\launch.json",
+    "path": ".vscode\\launch.json",
+    "extension": ".json",
+    "size": 775,
+    "language": "unknown"
+  },
+  {
+    "id": "analysis_options.yaml",
+    "path": "analysis_options.yaml",
+    "extension": ".yaml",
+    "size": 45,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gitignore",
+    "path": "android\\.gitignore",
+    "extension": "",
+    "size": 267,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\checksums\\checksums.lock",
+    "path": "android\\.gradle\\8.14\\checksums\\checksums.lock",
+    "extension": ".lock",
+    "size": 17,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\checksums\\md5-checksums.bin",
+    "path": "android\\.gradle\\8.14\\checksums\\md5-checksums.bin",
+    "extension": ".bin",
+    "size": 22647,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\checksums\\sha1-checksums.bin",
+    "path": "android\\.gradle\\8.14\\checksums\\sha1-checksums.bin",
+    "extension": ".bin",
+    "size": 28973,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\executionHistory\\executionHistory.bin",
+    "path": "android\\.gradle\\8.14\\executionHistory\\executionHistory.bin",
+    "extension": ".bin",
+    "size": 1387329,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\executionHistory\\executionHistory.lock",
+    "path": "android\\.gradle\\8.14\\executionHistory\\executionHistory.lock",
+    "extension": ".lock",
+    "size": 17,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\fileChanges\\last-build.bin",
+    "path": "android\\.gradle\\8.14\\fileChanges\\last-build.bin",
+    "extension": ".bin",
+    "size": 1,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\fileHashes\\fileHashes.bin",
+    "path": "android\\.gradle\\8.14\\fileHashes\\fileHashes.bin",
+    "extension": ".bin",
+    "size": 163983,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\fileHashes\\fileHashes.lock",
+    "path": "android\\.gradle\\8.14\\fileHashes\\fileHashes.lock",
+    "extension": ".lock",
+    "size": 17,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\fileHashes\\resourceHashesCache.bin",
+    "path": "android\\.gradle\\8.14\\fileHashes\\resourceHashesCache.bin",
+    "extension": ".bin",
+    "size": 21183,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\8.14\\gc.properties",
+    "path": "android\\.gradle\\8.14\\gc.properties",
+    "extension": ".properties",
+    "size": 0,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\buildOutputCleanup\\buildOutputCleanup.lock",
+    "path": "android\\.gradle\\buildOutputCleanup\\buildOutputCleanup.lock",
+    "extension": ".lock",
+    "size": 17,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\buildOutputCleanup\\cache.properties",
+    "path": "android\\.gradle\\buildOutputCleanup\\cache.properties",
+    "extension": ".properties",
+    "size": 53,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\buildOutputCleanup\\outputFiles.bin",
+    "path": "android\\.gradle\\buildOutputCleanup\\outputFiles.bin",
+    "extension": ".bin",
+    "size": 55697,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\file-system.probe",
+    "path": "android\\.gradle\\file-system.probe",
+    "extension": ".probe",
+    "size": 8,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\noVersion\\buildLogic.lock",
+    "path": "android\\.gradle\\noVersion\\buildLogic.lock",
+    "extension": ".lock",
+    "size": 17,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\.gradle\\vcs-1\\gc.properties",
+    "path": "android\\.gradle\\vcs-1\\gc.properties",
+    "extension": ".properties",
+    "size": 0,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\build.gradle.kts",
+    "path": "android\\app\\build.gradle.kts",
+    "extension": ".kts",
+    "size": 1486,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\debug\\AndroidManifest.xml",
+    "path": "android\\app\\src\\debug\\AndroidManifest.xml",
+    "extension": ".xml",
+    "size": 385,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\AndroidManifest.xml",
+    "path": "android\\app\\src\\main\\AndroidManifest.xml",
+    "extension": ".xml",
+    "size": 1037,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java",
+    "path": "android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java",
+    "extension": ".java",
+    "size": 1205,
+    "language": "java"
+  },
+  {
+    "id": "android\\app\\src\\main\\kotlin\\com\\hassnae\\credit_karnet\\flutter_application_1\\MainActivity.kt",
+    "path": "android\\app\\src\\main\\kotlin\\com\\hassnae\\credit_karnet\\flutter_application_1\\MainActivity.kt",
+    "extension": ".kt",
+    "size": 154,
+    "language": "kotlin"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\drawable\\launch_background.xml",
+    "path": "android\\app\\src\\main\\res\\drawable\\launch_background.xml",
+    "extension": ".xml",
+    "size": 446,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\drawable-v21\\launch_background.xml",
+    "path": "android\\app\\src\\main\\res\\drawable-v21\\launch_background.xml",
+    "extension": ".xml",
+    "size": 450,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png",
+    "path": "android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png",
+    "extension": ".png",
+    "size": 544,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png",
+    "path": "android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png",
+    "extension": ".png",
+    "size": 442,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png",
+    "path": "android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png",
+    "extension": ".png",
+    "size": 721,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png",
+    "path": "android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png",
+    "extension": ".png",
+    "size": 1031,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png",
+    "path": "android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png",
+    "extension": ".png",
+    "size": 1443,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\values\\styles.xml",
+    "path": "android\\app\\src\\main\\res\\values\\styles.xml",
+    "extension": ".xml",
+    "size": 1014,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\main\\res\\values-night\\styles.xml",
+    "path": "android\\app\\src\\main\\res\\values-night\\styles.xml",
+    "extension": ".xml",
+    "size": 1013,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\app\\src\\profile\\AndroidManifest.xml",
+    "path": "android\\app\\src\\profile\\AndroidManifest.xml",
+    "extension": ".xml",
+    "size": 385,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\build.gradle.kts",
+    "path": "android\\build.gradle.kts",
+    "extension": ".kts",
+    "size": 561,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\flutter_application_1_android.iml",
+    "path": "android\\flutter_application_1_android.iml",
+    "extension": ".iml",
+    "size": 1630,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\gradle\\wrapper\\gradle-wrapper.jar",
+    "path": "android\\gradle\\wrapper\\gradle-wrapper.jar",
+    "extension": ".jar",
+    "size": 53636,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\gradle\\wrapper\\gradle-wrapper.properties",
+    "path": "android\\gradle\\wrapper\\gradle-wrapper.properties",
+    "extension": ".properties",
+    "size": 206,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\gradle.properties",
+    "path": "android\\gradle.properties",
+    "extension": ".properties",
+    "size": 140,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\gradlew",
+    "path": "android\\gradlew",
+    "extension": "",
+    "size": 4971,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\gradlew.bat",
+    "path": "android\\gradlew.bat",
+    "extension": ".bat",
+    "size": 2404,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\local.properties",
+    "path": "android\\local.properties",
+    "extension": ".properties",
+    "size": 155,
+    "language": "unknown"
+  },
+  {
+    "id": "android\\settings.gradle.kts",
+    "path": "android\\settings.gradle.kts",
+    "extension": ".kts",
+    "size": 798,
+    "language": "unknown"
+  },
+  {
+    "id": "credit_karnet.iml",
+    "path": "credit_karnet.iml",
+    "extension": ".iml",
+    "size": 859,
+    "language": "unknown"
+  },
+  {
+    "id": "flutter_application_1.iml",
+    "path": "flutter_application_1.iml",
+    "extension": ".iml",
+    "size": 859,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\.gitignore",
+    "path": "ios\\.gitignore",
+    "extension": "",
+    "size": 603,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Flutter\\AppFrameworkInfo.plist",
+    "path": "ios\\Flutter\\AppFrameworkInfo.plist",
+    "extension": ".plist",
+    "size": 744,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Flutter\\Debug.xcconfig",
+    "path": "ios\\Flutter\\Debug.xcconfig",
+    "extension": ".xcconfig",
+    "size": 31,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Flutter\\ephemeral\\flutter_lldbinit",
+    "path": "ios\\Flutter\\ephemeral\\flutter_lldbinit",
+    "extension": "",
+    "size": 108,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Flutter\\ephemeral\\flutter_lldb_helper.py",
+    "path": "ios\\Flutter\\ephemeral\\flutter_lldb_helper.py",
+    "extension": ".py",
+    "size": 1276,
+    "language": "python"
+  },
+  {
+    "id": "ios\\Flutter\\flutter_export_environment.sh",
+    "path": "ios\\Flutter\\flutter_export_environment.sh",
+    "extension": ".sh",
+    "size": 529,
+    "language": "bash"
+  },
+  {
+    "id": "ios\\Flutter\\Generated.xcconfig",
+    "path": "ios\\Flutter\\Generated.xcconfig",
+    "extension": ".xcconfig",
+    "size": 499,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Flutter\\Release.xcconfig",
+    "path": "ios\\Flutter\\Release.xcconfig",
+    "extension": ".xcconfig",
+    "size": 31,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\AppDelegate.swift",
+    "path": "ios\\Runner\\AppDelegate.swift",
+    "extension": ".swift",
+    "size": 555,
+    "language": "swift"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+    "extension": ".json",
+    "size": 2641,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-1024x1024@1x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-1024x1024@1x.png",
+    "extension": ".png",
+    "size": 10932,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@1x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@1x.png",
+    "extension": ".png",
+    "size": 295,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@2x.png",
+    "extension": ".png",
+    "size": 406,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@3x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@3x.png",
+    "extension": ".png",
+    "size": 450,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@1x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@1x.png",
+    "extension": ".png",
+    "size": 282,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@2x.png",
+    "extension": ".png",
+    "size": 462,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@3x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@3x.png",
+    "extension": ".png",
+    "size": 704,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@1x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@1x.png",
+    "extension": ".png",
+    "size": 406,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@2x.png",
+    "extension": ".png",
+    "size": 586,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@3x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@3x.png",
+    "extension": ".png",
+    "size": 862,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@2x.png",
+    "extension": ".png",
+    "size": 862,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@3x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@3x.png",
+    "extension": ".png",
+    "size": 1674,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@1x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@1x.png",
+    "extension": ".png",
+    "size": 762,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@2x.png",
+    "extension": ".png",
+    "size": 1226,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-83.5x83.5@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-83.5x83.5@2x.png",
+    "extension": ".png",
+    "size": 1418,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\Contents.json",
+    "path": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\Contents.json",
+    "extension": ".json",
+    "size": 414,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage.png",
+    "path": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage.png",
+    "extension": ".png",
+    "size": 68,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@2x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@2x.png",
+    "extension": ".png",
+    "size": 68,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@3x.png",
+    "path": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@3x.png",
+    "extension": ".png",
+    "size": 68,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+    "path": "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+    "extension": ".md",
+    "size": 340,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Base.lproj\\LaunchScreen.storyboard",
+    "path": "ios\\Runner\\Base.lproj\\LaunchScreen.storyboard",
+    "extension": ".storyboard",
+    "size": 2414,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Base.lproj\\Main.storyboard",
+    "path": "ios\\Runner\\Base.lproj\\Main.storyboard",
+    "extension": ".storyboard",
+    "size": 1631,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\GeneratedPluginRegistrant.h",
+    "path": "ios\\Runner\\GeneratedPluginRegistrant.h",
+    "extension": ".h",
+    "size": 378,
+    "language": "c"
+  },
+  {
+    "id": "ios\\Runner\\GeneratedPluginRegistrant.m",
+    "path": "ios\\Runner\\GeneratedPluginRegistrant.m",
+    "extension": ".m",
+    "size": 444,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Info.plist",
+    "path": "ios\\Runner\\Info.plist",
+    "extension": ".plist",
+    "size": 2310,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner\\Runner-Bridging-Header.h",
+    "path": "ios\\Runner\\Runner-Bridging-Header.h",
+    "extension": ".h",
+    "size": 39,
+    "language": "c"
+  },
+  {
+    "id": "ios\\Runner\\SceneDelegate.swift",
+    "path": "ios\\Runner\\SceneDelegate.swift",
+    "extension": ".swift",
+    "size": 82,
+    "language": "swift"
+  },
+  {
+    "id": "ios\\Runner.xcodeproj\\project.pbxproj",
+    "path": "ios\\Runner.xcodeproj\\project.pbxproj",
+    "extension": ".pbxproj",
+    "size": 24788,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcodeproj\\project.xcworkspace\\contents.xcworkspacedata",
+    "path": "ios\\Runner.xcodeproj\\project.xcworkspace\\contents.xcworkspacedata",
+    "extension": ".xcworkspacedata",
+    "size": 142,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcodeproj\\project.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "path": "ios\\Runner.xcodeproj\\project.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "extension": ".plist",
+    "size": 246,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcodeproj\\project.xcworkspace\\xcshareddata\\WorkspaceSettings.xcsettings",
+    "path": "ios\\Runner.xcodeproj\\project.xcworkspace\\xcshareddata\\WorkspaceSettings.xcsettings",
+    "extension": ".xcsettings",
+    "size": 234,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcodeproj\\xcshareddata\\xcschemes\\Runner.xcscheme",
+    "path": "ios\\Runner.xcodeproj\\xcshareddata\\xcschemes\\Runner.xcscheme",
+    "extension": ".xcscheme",
+    "size": 3934,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcworkspace\\contents.xcworkspacedata",
+    "path": "ios\\Runner.xcworkspace\\contents.xcworkspacedata",
+    "extension": ".xcworkspacedata",
+    "size": 159,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "path": "ios\\Runner.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "extension": ".plist",
+    "size": 246,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\Runner.xcworkspace\\xcshareddata\\WorkspaceSettings.xcsettings",
+    "path": "ios\\Runner.xcworkspace\\xcshareddata\\WorkspaceSettings.xcsettings",
+    "extension": ".xcsettings",
+    "size": 234,
+    "language": "unknown"
+  },
+  {
+    "id": "ios\\RunnerTests\\RunnerTests.swift",
+    "path": "ios\\RunnerTests\\RunnerTests.swift",
+    "extension": ".swift",
+    "size": 297,
+    "language": "swift"
+  },
+  {
+    "id": "lib\\main.dart",
+    "path": "lib\\main.dart",
+    "extension": ".dart",
+    "size": 40315,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\models\\client.dart",
+    "path": "lib\\models\\client.dart",
+    "extension": ".dart",
+    "size": 1278,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\models\\credit.dart",
+    "path": "lib\\models\\credit.dart",
+    "extension": ".dart",
+    "size": 1870,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\models\\customer.dart",
+    "path": "lib\\models\\customer.dart",
+    "extension": ".dart",
+    "size": 640,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\models\\paiement.dart",
+    "path": "lib\\models\\paiement.dart",
+    "extension": ".dart",
+    "size": 1143,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\screens\\add_client_screen.dart",
+    "path": "lib\\screens\\add_client_screen.dart",
+    "extension": ".dart",
+    "size": 0,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\screens\\home_screen.dart",
+    "path": "lib\\screens\\home_screen.dart",
+    "extension": ".dart",
+    "size": 0,
+    "language": "unknown"
+  },
+  {
+    "id": "lib\\services\\database_helper.dart",
+    "path": "lib\\services\\database_helper.dart",
+    "extension": ".dart",
+    "size": 6240,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\.gitignore",
+    "path": "linux\\.gitignore",
+    "extension": "",
+    "size": 19,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\CMakeLists.txt",
+    "path": "linux\\CMakeLists.txt",
+    "extension": ".txt",
+    "size": 4909,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\flutter\\CMakeLists.txt",
+    "path": "linux\\flutter\\CMakeLists.txt",
+    "extension": ".txt",
+    "size": 2903,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\flutter\\generated_plugins.cmake",
+    "path": "linux\\flutter\\generated_plugins.cmake",
+    "extension": ".cmake",
+    "size": 745,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\flutter\\generated_plugin_registrant.cc",
+    "path": "linux\\flutter\\generated_plugin_registrant.cc",
+    "extension": ".cc",
+    "size": 161,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\flutter\\generated_plugin_registrant.h",
+    "path": "linux\\flutter\\generated_plugin_registrant.h",
+    "extension": ".h",
+    "size": 303,
+    "language": "c"
+  },
+  {
+    "id": "linux\\runner\\CMakeLists.txt",
+    "path": "linux\\runner\\CMakeLists.txt",
+    "extension": ".txt",
+    "size": 1000,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\runner\\main.cc",
+    "path": "linux\\runner\\main.cc",
+    "extension": ".cc",
+    "size": 186,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\runner\\my_application.cc",
+    "path": "linux\\runner\\my_application.cc",
+    "extension": ".cc",
+    "size": 5629,
+    "language": "unknown"
+  },
+  {
+    "id": "linux\\runner\\my_application.h",
+    "path": "linux\\runner\\my_application.h",
+    "extension": ".h",
+    "size": 472,
+    "language": "c"
+  },
+  {
+    "id": "macos\\.gitignore",
+    "path": "macos\\.gitignore",
+    "extension": "",
+    "size": 96,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Flutter\\ephemeral\\Flutter-Generated.xcconfig",
+    "path": "macos\\Flutter\\ephemeral\\Flutter-Generated.xcconfig",
+    "extension": ".xcconfig",
+    "size": 392,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Flutter\\ephemeral\\flutter_export_environment.sh",
+    "path": "macos\\Flutter\\ephemeral\\flutter_export_environment.sh",
+    "extension": ".sh",
+    "size": 491,
+    "language": "bash"
+  },
+  {
+    "id": "macos\\Flutter\\Flutter-Debug.xcconfig",
+    "path": "macos\\Flutter\\Flutter-Debug.xcconfig",
+    "extension": ".xcconfig",
+    "size": 49,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Flutter\\Flutter-Release.xcconfig",
+    "path": "macos\\Flutter\\Flutter-Release.xcconfig",
+    "extension": ".xcconfig",
+    "size": 49,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Flutter\\GeneratedPluginRegistrant.swift",
+    "path": "macos\\Flutter\\GeneratedPluginRegistrant.swift",
+    "extension": ".swift",
+    "size": 248,
+    "language": "swift"
+  },
+  {
+    "id": "macos\\Runner\\AppDelegate.swift",
+    "path": "macos\\Runner\\AppDelegate.swift",
+    "extension": ".swift",
+    "size": 324,
+    "language": "swift"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_1024.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_1024.png",
+    "extension": ".png",
+    "size": 102994,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_128.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_128.png",
+    "extension": ".png",
+    "size": 5680,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_16.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_16.png",
+    "extension": ".png",
+    "size": 520,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_256.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_256.png",
+    "extension": ".png",
+    "size": 14142,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_32.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_32.png",
+    "extension": ".png",
+    "size": 1066,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_512.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_512.png",
+    "extension": ".png",
+    "size": 36406,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_64.png",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\app_icon_64.png",
+    "extension": ".png",
+    "size": 2218,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+    "path": "macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+    "extension": ".json",
+    "size": 1359,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Base.lproj\\MainMenu.xib",
+    "path": "macos\\Runner\\Base.lproj\\MainMenu.xib",
+    "extension": ".xib",
+    "size": 24072,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Configs\\AppInfo.xcconfig",
+    "path": "macos\\Runner\\Configs\\AppInfo.xcconfig",
+    "extension": ".xcconfig",
+    "size": 641,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Configs\\Debug.xcconfig",
+    "path": "macos\\Runner\\Configs\\Debug.xcconfig",
+    "extension": ".xcconfig",
+    "size": 79,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Configs\\Release.xcconfig",
+    "path": "macos\\Runner\\Configs\\Release.xcconfig",
+    "extension": ".xcconfig",
+    "size": 81,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Configs\\Warnings.xcconfig",
+    "path": "macos\\Runner\\Configs\\Warnings.xcconfig",
+    "extension": ".xcconfig",
+    "size": 593,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\DebugProfile.entitlements",
+    "path": "macos\\Runner\\DebugProfile.entitlements",
+    "extension": ".entitlements",
+    "size": 360,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\Info.plist",
+    "path": "macos\\Runner\\Info.plist",
+    "extension": ".plist",
+    "size": 1092,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner\\MainFlutterWindow.swift",
+    "path": "macos\\Runner\\MainFlutterWindow.swift",
+    "extension": ".swift",
+    "size": 403,
+    "language": "swift"
+  },
+  {
+    "id": "macos\\Runner\\Release.entitlements",
+    "path": "macos\\Runner\\Release.entitlements",
+    "extension": ".entitlements",
+    "size": 248,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner.xcodeproj\\project.pbxproj",
+    "path": "macos\\Runner.xcodeproj\\project.pbxproj",
+    "extension": ".pbxproj",
+    "size": 27227,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner.xcodeproj\\project.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "path": "macos\\Runner.xcodeproj\\project.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "extension": ".plist",
+    "size": 246,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner.xcodeproj\\xcshareddata\\xcschemes\\Runner.xcscheme",
+    "path": "macos\\Runner.xcodeproj\\xcshareddata\\xcschemes\\Runner.xcscheme",
+    "extension": ".xcscheme",
+    "size": 3842,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner.xcworkspace\\contents.xcworkspacedata",
+    "path": "macos\\Runner.xcworkspace\\contents.xcworkspacedata",
+    "extension": ".xcworkspacedata",
+    "size": 159,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\Runner.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "path": "macos\\Runner.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+    "extension": ".plist",
+    "size": 246,
+    "language": "unknown"
+  },
+  {
+    "id": "macos\\RunnerTests\\RunnerTests.swift",
+    "path": "macos\\RunnerTests\\RunnerTests.swift",
+    "extension": ".swift",
+    "size": 302,
+    "language": "swift"
+  },
+  {
+    "id": "pubspec.lock",
+    "path": "pubspec.lock",
+    "extension": ".lock",
+    "size": 14746,
+    "language": "unknown"
+  },
+  {
+    "id": "pubspec.yaml",
+    "path": "pubspec.yaml",
+    "extension": ".yaml",
+    "size": 474,
+    "language": "unknown"
+  },
+  {
+    "id": "README.md",
+    "path": "README.md",
+    "extension": ".md",
+    "size": 85,
+    "language": "unknown"
+  },
+  {
+    "id": "test\\widget_test.dart",
+    "path": "test\\widget_test.dart",
+    "extension": ".dart",
+    "size": 1094,
+    "language": "unknown"
+  },
+  {
+    "id": "web\\favicon.png",
+    "path": "web\\favicon.png",
+    "extension": ".png",
+    "size": 917,
+    "language": "unknown"
+  },
+  {
+    "id": "web\\icons\\Icon-192.png",
+    "path": "web\\icons\\Icon-192.png",
+    "extension": ".png",
+    "size": 5292,
+    "language": "unknown"
+  },
+  {
+    "id": "web\\icons\\Icon-512.png",
+    "path": "web\\icons\\Icon-512.png",
+    "extension": ".png",
+    "size": 8252,
+    "language": "unknown"
+  },
+  {
+    "id": "web\\icons\\Icon-maskable-192.png",
+    "path": "web\\icons\\Icon-maskable-192.png",
+    "extension": ".png",
+    "size": 5594,
+    "language": "unknown"
+  },
+  {
+    "id": "web\\icons\\Icon-maskable-512.png",
+    "path": "web\\icons\\Icon-maskable-512.png",
+    "extension": ".png",
+    "size": 20998,
+    "language": "unknown"
+  },
+  {
+    "id": "web\\index.html",
+    "path": "web\\index.html",
+    "extension": ".html",
+    "size": 1593,
+    "language": "html"
+  },
+  {
+    "id": "web\\manifest.json",
+    "path": "web\\manifest.json",
+    "extension": ".json",
+    "size": 973,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\.gitignore",
+    "path": "windows\\.gitignore",
+    "extension": "",
+    "size": 308,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\CMakeLists.txt",
+    "path": "windows\\CMakeLists.txt",
+    "extension": ".txt",
+    "size": 4286,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\flutter\\CMakeLists.txt",
+    "path": "windows\\flutter\\CMakeLists.txt",
+    "extension": ".txt",
+    "size": 3851,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\flutter\\ephemeral\\generated_config.cmake",
+    "path": "windows\\flutter\\ephemeral\\generated_config.cmake",
+    "extension": ".cmake",
+    "size": 1305,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\flutter\\generated_plugins.cmake",
+    "path": "windows\\flutter\\generated_plugins.cmake",
+    "extension": ".cmake",
+    "size": 749,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\flutter\\generated_plugin_registrant.cc",
+    "path": "windows\\flutter\\generated_plugin_registrant.cc",
+    "extension": ".cc",
+    "size": 164,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\flutter\\generated_plugin_registrant.h",
+    "path": "windows\\flutter\\generated_plugin_registrant.h",
+    "extension": ".h",
+    "size": 302,
+    "language": "c"
+  },
+  {
+    "id": "windows\\runner\\CMakeLists.txt",
+    "path": "windows\\runner\\CMakeLists.txt",
+    "extension": ".txt",
+    "size": 1836,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\runner\\flutter_window.cpp",
+    "path": "windows\\runner\\flutter_window.cpp",
+    "extension": ".cpp",
+    "size": 2193,
+    "language": "cpp"
+  },
+  {
+    "id": "windows\\runner\\flutter_window.h",
+    "path": "windows\\runner\\flutter_window.h",
+    "extension": ".h",
+    "size": 961,
+    "language": "c"
+  },
+  {
+    "id": "windows\\runner\\main.cpp",
+    "path": "windows\\runner\\main.cpp",
+    "extension": ".cpp",
+    "size": 1317,
+    "language": "cpp"
+  },
+  {
+    "id": "windows\\runner\\resource.h",
+    "path": "windows\\runner\\resource.h",
+    "extension": ".h",
+    "size": 448,
+    "language": "c"
+  },
+  {
+    "id": "windows\\runner\\resources\\app_icon.ico",
+    "path": "windows\\runner\\resources\\app_icon.ico",
+    "extension": ".ico",
+    "size": 33772,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\runner\\runner.exe.manifest",
+    "path": "windows\\runner\\runner.exe.manifest",
+    "extension": ".manifest",
+    "size": 616,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\runner\\Runner.rc",
+    "path": "windows\\runner\\Runner.rc",
+    "extension": ".rc",
+    "size": 3202,
+    "language": "unknown"
+  },
+  {
+    "id": "windows\\runner\\utils.cpp",
+    "path": "windows\\runner\\utils.cpp",
+    "extension": ".cpp",
+    "size": 1862,
+    "language": "cpp"
+  },
+  {
+    "id": "windows\\runner\\utils.h",
+    "path": "windows\\runner\\utils.h",
+    "extension": ".h",
+    "size": 691,
+    "language": "c"
+  },
+  {
+    "id": "windows\\runner\\win32_window.cpp",
+    "path": "windows\\runner\\win32_window.cpp",
+    "extension": ".cpp",
+    "size": 8822,
+    "language": "cpp"
+  },
+  {
+    "id": "windows\\runner\\win32_window.h",
+    "path": "windows\\runner\\win32_window.h",
+    "extension": ".h",
+    "size": 3624,
+    "language": "c"
+  }
+]
