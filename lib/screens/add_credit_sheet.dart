@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../database_helper.dart';
 import '../models.dart';
 import '../utils/app_translations.dart';
+import '../services/image_encryption_service.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
 
@@ -31,8 +32,7 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
   }
 
   Future<void> _pickImage(ImageSource src) async {
-    final x =
-        await ImagePicker().pickImage(source: src, imageQuality: 85);
+    final x = await ImagePicker().pickImage(source: src, imageQuality: 85);
     if (x != null) setState(() => _imagePath = x.path);
   }
 
@@ -40,18 +40,14 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
   Widget build(BuildContext context) {
     final theme     = Theme.of(context);
     final isDark    = theme.brightness == Brightness.dark;
-    final fillColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFF5F6FA);
+    final fillColor = isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF5F6FA);
     final textColor = theme.textTheme.bodyLarge?.color;
 
     return Container(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         child: Padding(
@@ -61,36 +57,31 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // ── Header ───────────────────────────────────────────────────
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close)),
-                    Text(
-                      Tr.s('add_credit'),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Cairo',
-                          color: theme.textTheme.titleLarge?.color),
-                    ),
-                  ]),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close)),
+                Text(
+                  Tr.s('add_credit'),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Cairo',
+                      color: theme.textTheme.titleLarge?.color),
+                ),
+              ]),
               const SizedBox(height: 16),
 
               // ── Amount ───────────────────────────────────────────────────
               TextField(
                 controller: _montantCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 textAlign: TextAlign.right,
-                style: TextStyle(
-                    fontFamily: 'Cairo', fontSize: 20, color: textColor),
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 20, color: textColor),
                 decoration: InputDecoration(
                   hintText: '0.00',
                   prefixText: '${Tr.s('currency')}  ',
-                  prefixStyle: const TextStyle(
-                      color: _kPrimary, fontFamily: 'Cairo'),
+                  prefixStyle: const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
                   filled: true,
                   fillColor: fillColor,
                   border: OutlineInputBorder(
@@ -107,10 +98,8 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
                 style: TextStyle(fontFamily: 'Cairo', color: textColor),
                 decoration: InputDecoration(
                   hintText: Tr.s('description'),
-                  hintStyle: const TextStyle(
-                      fontFamily: 'Cairo', color: Colors.grey),
-                  prefixIcon:
-                      const Icon(Icons.notes, color: _kPrimary),
+                  hintStyle: const TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+                  prefixIcon: const Icon(Icons.notes, color: _kPrimary),
                   filled: true,
                   fillColor: fillColor,
                   border: OutlineInputBorder(
@@ -128,8 +117,7 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
                     icon: const Icon(Icons.photo_library),
                     label: Text(Tr.s('gallery'),
                         style: const TextStyle(fontFamily: 'Cairo')),
-                    style: OutlinedButton.styleFrom(
-                        foregroundColor: textColor),
+                    style: OutlinedButton.styleFrom(foregroundColor: textColor),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -139,8 +127,7 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
                     icon: const Icon(Icons.camera_alt),
                     label: Text(Tr.s('camera'),
                         style: const TextStyle(fontFamily: 'Cairo')),
-                    style: OutlinedButton.styleFrom(
-                        foregroundColor: textColor),
+                    style: OutlinedButton.styleFrom(foregroundColor: textColor),
                   ),
                 ),
               ]),
@@ -151,9 +138,7 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.file(File(_imagePath!),
-                      height: 100,
-                      width: double.infinity,
-                      fit: BoxFit.cover),
+                      height: 100, width: double.infinity, fit: BoxFit.cover),
                 ),
               ],
               const SizedBox(height: 24),
@@ -170,14 +155,11 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
                   ),
                   onPressed: _saving ? null : _save,
                   child: _saving
-                      ? const CircularProgressIndicator(
-                          color: Colors.white)
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           Tr.s('register_credit'),
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Cairo'),
+                              color: Colors.white, fontSize: 16, fontFamily: 'Cairo'),
                         ),
                 ),
               ),
@@ -188,36 +170,39 @@ class _AddCreditSheetState extends State<AddCreditSheet> {
     );
   }
 
-  Future<void> _save() async {
-    final montant = double.tryParse(
-        _montantCtrl.text.replaceAll(',', '.'));
-    if (montant == null || montant <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(Tr.s('enter_valid_amount'),
-              style: const TextStyle(fontFamily: 'Cairo'))));
-      return;
-    }
-    setState(() => _saving = true);
-    try {
-      await DatabaseHelper.instance.createCredit(Credit(
-        clientId:      widget.clientId,
-        montantTotal:  montant,
-        montantRestant: montant,
-        dateCredit:    DateTime.now(),
-        description:   _descCtrl.text.trim().isEmpty
-            ? null
-            : _descCtrl.text.trim(),
-        imagePath: _imagePath,
-      ));
-      widget.onSaved();
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('${Tr.s('error_prefix')} $e',
-              style: const TextStyle(fontFamily: 'Cairo')),
-          backgroundColor: Colors.red));
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+Future<void> _save() async {
+  final montant = double.tryParse(_montantCtrl.text.replaceAll(',', '.'));
+  if (montant == null || montant <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(Tr.s('enter_valid_amount'),
+            style: const TextStyle(fontFamily: 'Cairo'))));
+    return;
   }
-}
+  setState(() => _saving = true);
+  try {
+    // ← هنا داخل try
+    String? finalImagePath = _imagePath;
+    if (_imagePath != null) {
+      finalImagePath = await ImageEncryptionService.instance
+          .encryptImage(_imagePath!);
+    }
+
+    await DatabaseHelper.instance.createCredit(Credit(
+      clientId:       widget.clientId,
+      montantTotal:   montant,
+      montantRestant: montant,
+      dateCredit:     DateTime.now(),
+      description:    _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
+      imagePath:      finalImagePath,  // ← finalImagePath مش _imagePath
+    ));
+    widget.onSaved();
+    if (mounted) Navigator.pop(context);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${Tr.s('error_prefix')} $e',
+            style: const TextStyle(fontFamily: 'Cairo')),
+        backgroundColor: Colors.red));
+  } finally {
+    if (mounted) setState(() => _saving = false);
+  }
+}}

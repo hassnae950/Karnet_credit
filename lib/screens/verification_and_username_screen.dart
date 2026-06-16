@@ -99,21 +99,29 @@ class _VerificationAndUsernameScreenState
 
       if (!mounted) return;
 
-      _showRestoreDialog();
+      // ═══════════════════════════════════════════════════════
+      //  ✅ سؤال المستخدم: واش بغى يستعيد البيانات أو لا
+      // ═══════════════════════════════════════════════════════
+      final wantsRestore = await _askRestoreConfirmation();
 
-      final hasInternet = await widget.syncService.hasInternetConnection();
       bool restored = false;
-      if (hasInternet) {
-        final phone = prefs.getString('user_phone') ?? widget.phone;
-        restored = await widget.syncService.restoreAllData(phone);
-      }
 
-      if (!mounted) return;
-      Navigator.pop(context);
+      if (wantsRestore) {
+        _showRestoreDialog();
 
-      if (restored &&
-          widget.syncService.syncStatus == Tr.s('restore_success')) {
-        _showSnack('تم استعادة البيانات بنجاح', isSuccess: true);
+        final hasInternet = await widget.syncService.hasInternetConnection();
+        if (hasInternet) {
+          final phone = prefs.getString('user_phone') ?? widget.phone;
+          restored = await widget.syncService.restoreAllData(phone);
+        }
+
+        if (!mounted) return;
+        Navigator.pop(context);
+
+        if (restored &&
+            widget.syncService.syncStatus == Tr.s('restore_success')) {
+          _showSnack('تم استعادة البيانات بنجاح', isSuccess: true);
+        }
       }
 
       await Future.delayed(const Duration(milliseconds: 400));
@@ -136,6 +144,49 @@ class _VerificationAndUsernameScreenState
   // ═══════════════════════════════════════════════════════════════
   //  UI Helpers
   // ═══════════════════════════════════════════════════════════════
+
+  /// Dialog بزوج بوتونات: "نعم، استعادة" / "لا، بداية جديدة"
+  /// كيرجع true إذا بغى المستخدم يستعيد، false إذا بغى يدخل خاوي
+  Future<bool> _askRestoreConfirmation() async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          Tr.s('restore_dialog_title'),
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          Tr.s('restore_dialog_msg'),
+          style: const TextStyle(fontFamily: 'Cairo'),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              Tr.s('restore_no'),
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _kPrimary,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              Tr.s('restore_yes'),
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
 
   void _showRestoreDialog() {
     showDialog(

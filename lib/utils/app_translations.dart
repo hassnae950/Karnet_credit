@@ -608,6 +608,33 @@ class Tr {
   'en': 'Register payment'
 },
 
+// ── Restore confirmation dialog ──────────────────────────────────────
+'restore_dialog_title': {
+  'ar': 'استعادة البيانات؟',
+  'fr': 'Restaurer les données ?',
+  'en': 'Restore data?'
+},
+'restore_dialog_msg': {
+  'ar': 'كاين نسخة محفوظة من بياناتك فالسحابة. واش بغيتي تستعادها؟',
+  'fr': 'Une sauvegarde de vos données existe dans le cloud. Voulez-vous la restaurer ?',
+  'en': 'A backup of your data was found in the cloud. Do you want to restore it?'
+},
+'restore_yes': {
+  'ar': 'نعم، استعادة',
+  'fr': 'Oui, restaurer',
+  'en': 'Yes, restore'
+},
+'restore_no': {
+  'ar': 'لا، بداية جديدة',
+  'fr': 'Non, nouveau départ',
+  'en': 'No, start fresh'
+},
+'checking_backup': {
+  'ar': 'جاري البحث عن نسخة محفوظة...',
+  'fr': 'Recherche d\'une sauvegarde...',
+  'en': 'Checking for backup...'
+},
+
   };
 
   // ── Core lookup ──────────────────────────────────────────────────────────────

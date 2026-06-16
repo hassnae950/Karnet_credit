@@ -4,29 +4,18 @@ import '../models.dart';
 import '../utils/helpers.dart';
 import '../utils/app_translations.dart';
 import 'client_detail_screen.dart';
+import '../services/pdf_service.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
-const _kRed     = Color(0xFFD32F2F);
-const _kGreen   = Color(0xFF388E3C);
-const _kBlue    = Color(0xFF1976D2);
+const _kRed = Color(0xFFD32F2F);
+const _kGreen = Color(0xFF388E3C);
+const _kBlue = Color(0xFF1976D2);
 
 // ── Sort options ──────────────────────────────────────────────────────────────
-enum SortOption { 
-  nameAZ, 
-  nameZA, 
-  debtHigh, 
-  debtLow, 
-  recentActivity,
-  oldest 
-}
+enum SortOption { nameAZ, nameZA, debtHigh, debtLow, recentActivity, oldest }
 
 // ── Filter options ────────────────────────────────────────────────────────────
-enum FilterOption { 
-  all, 
-  withDebt, 
-  settled, 
-  hasCheque
-}
+enum FilterOption { all, withDebt, settled, hasCheque }
 
 class ClientsScreen extends StatefulWidget {
   final String type;
@@ -48,11 +37,11 @@ class ClientsScreenState extends State<ClientsScreen>
   bool _loading = true;
   String _search = '';
 
-  double _totalCredit  = 0;
+  double _totalCredit = 0;
   double _totalRestant = 0;
-  double _totalPaye    = 0;
+  double _totalPaye = 0;
 
-  SortOption   _sort   = SortOption.recentActivity;
+  SortOption _sort = SortOption.recentActivity;
   FilterOption _filter = FilterOption.all;
 
   @override
@@ -67,24 +56,25 @@ class ClientsScreenState extends State<ClientsScreen>
   Future<void> loadData() async {
     if (!mounted) return;
     setState(() => _loading = true);
-    
+
     final clients = await DatabaseHelper.instance.getClientsByType(widget.type);
-    
+
     for (var c in clients) {
       c.solde = await DatabaseHelper.instance.getSoldeClient(c.id!);
-      c.lastActivityDate = await DatabaseHelper.instance.getLastActivityDate(c.id!);
+      c.lastActivityDate =
+          await DatabaseHelper.instance.getLastActivityDate(c.id!);
       c.chequeCount = await DatabaseHelper.instance.getClientChequeCount(c.id!);
     }
-    
+
     final stats = await DatabaseHelper.instance.getStatsByType(widget.type);
-    
+
     if (mounted) {
       setState(() {
-        _clients      = clients;
-        _totalCredit  = stats['totalCredit']  ?? 0;
+        _clients = clients;
+        _totalCredit = stats['totalCredit'] ?? 0;
         _totalRestant = stats['totalRestant'] ?? 0;
-        _totalPaye    = stats['totalPaye']    ?? 0;
-        _loading      = false;
+        _totalPaye = stats['totalPaye'] ?? 0;
+        _loading = false;
       });
     }
     widget.onStatsChanged?.call();
@@ -94,10 +84,11 @@ class ClientsScreenState extends State<ClientsScreen>
   List<Client> get _processed {
     var list = _clients.where((c) {
       final searchLower = _search.toLowerCase();
-      final matchName    = c.nom.toLowerCase().contains(searchLower);
-      final matchCompany = (c.company ?? '').toLowerCase().contains(searchLower);
-      final matchPhone   = (c.telephone ?? '').contains(_search);
-      
+      final matchName = c.nom.toLowerCase().contains(searchLower);
+      final matchCompany =
+          (c.company ?? '').toLowerCase().contains(searchLower);
+      final matchPhone = (c.telephone ?? '').contains(_search);
+
       if (!matchName && !matchCompany && !matchPhone) return false;
 
       switch (_filter) {
@@ -149,11 +140,11 @@ class ClientsScreenState extends State<ClientsScreen>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => _FilterSheet(
-        currentSort:   _sort,
+        currentSort: _sort,
         currentFilter: _filter,
         onApply: (sort, filter) {
           setState(() {
-            _sort   = sort;
+            _sort = sort;
             _filter = filter;
           });
         },
@@ -164,9 +155,10 @@ class ClientsScreenState extends State<ClientsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final theme     = Theme.of(context);
+    final theme = Theme.of(context);
     final processed = _processed;
-    final hasFilters = _sort != SortOption.recentActivity || _filter != FilterOption.all;
+    final hasFilters =
+        _sort != SortOption.recentActivity || _filter != FilterOption.all;
 
     return CustomScrollView(
       slivers: [
@@ -197,7 +189,8 @@ class ClientsScreenState extends State<ClientsScreen>
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 12),
                       ),
                       onChanged: (v) => setState(() => _search = v),
                     ),
@@ -219,9 +212,11 @@ class ClientsScreenState extends State<ClientsScreen>
                               color: hasFilters ? Colors.white : _kPrimary),
                           if (hasFilters)
                             Positioned(
-                              right: 6, top: 6,
+                              right: 6,
+                              top: 6,
                               child: Container(
-                                width: 8, height: 8,
+                                width: 8,
+                                height: 8,
                                 decoration: const BoxDecoration(
                                   color: Colors.orange,
                                   shape: BoxShape.circle,
@@ -230,6 +225,20 @@ class ClientsScreenState extends State<ClientsScreen>
                             ),
                         ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _printAllClients,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.picture_as_pdf_outlined,
+                          color: _kPrimary),
                     ),
                   ),
                 ],
@@ -245,18 +254,20 @@ class ClientsScreenState extends State<ClientsScreen>
         if (!_loading)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(right: 20, left: 20, bottom: 4, top: 2),
+              padding:
+                  const EdgeInsets.only(right: 20, left: 20, bottom: 4, top: 2),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (hasFilters)
                     GestureDetector(
                       onTap: () => setState(() {
-                        _sort   = SortOption.recentActivity;
+                        _sort = SortOption.recentActivity;
                         _filter = FilterOption.all;
                       }),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: _kPrimary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -265,8 +276,10 @@ class ClientsScreenState extends State<ClientsScreen>
                           const Icon(Icons.close, size: 12, color: _kPrimary),
                           const SizedBox(width: 4),
                           Text(Tr.s('clear_filter'),
-                              style: const TextStyle(color: _kPrimary,
-                                  fontSize: 11, fontFamily: 'Cairo')),
+                              style: const TextStyle(
+                                  color: _kPrimary,
+                                  fontSize: 11,
+                                  fontFamily: 'Cairo')),
                         ]),
                       ),
                     )
@@ -274,8 +287,8 @@ class ClientsScreenState extends State<ClientsScreen>
                     const SizedBox(),
                   Text(
                     '${processed.length} ${widget.type == 'CLIENT' ? Tr.s('client_count') : Tr.s('supplier_count')}',
-                    style: const TextStyle(color: Colors.grey,
-                        fontSize: 13, fontFamily: 'Cairo'),
+                    style: const TextStyle(
+                        color: Colors.grey, fontSize: 13, fontFamily: 'Cairo'),
                   ),
                 ],
               ),
@@ -311,11 +324,14 @@ class ClientsScreenState extends State<ClientsScreen>
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
         child: Row(
           children: [
-            _statChip(Tr.s('took'),      _totalCredit,  _kGreen, _kGreen.withOpacity(0.12)),
+            _statChip(
+                Tr.s('took'), _totalCredit, _kGreen, _kGreen.withOpacity(0.12)),
             const SizedBox(width: 8),
-            _statChip(Tr.s('remaining'), _totalRestant, _kRed,   _kRed.withOpacity(0.12)),
+            _statChip(Tr.s('remaining'), _totalRestant, _kRed,
+                _kRed.withOpacity(0.12)),
             const SizedBox(width: 8),
-            _statChip(Tr.s('gave'),      _totalPaye,    _kBlue,  _kBlue.withOpacity(0.12)),
+            _statChip(
+                Tr.s('gave'), _totalPaye, _kBlue, _kBlue.withOpacity(0.12)),
           ],
         ),
       );
@@ -324,17 +340,26 @@ class ClientsScreenState extends State<ClientsScreen>
       Expanded(
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+          decoration:
+              BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(label, style: TextStyle(color: color, fontSize: 11, fontFamily: 'Cairo')),
+            Text(label,
+                style:
+                    TextStyle(color: color, fontSize: 11, fontFamily: 'Cairo')),
             const SizedBox(height: 2),
             Text(formatMontant(amount),
-                style: TextStyle(color: color, fontWeight: FontWeight.bold,
-                    fontSize: 13, fontFamily: 'Cairo'),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+                style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    fontFamily: 'Cairo'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
             Text(Tr.s('currency'),
-                style: TextStyle(color: color.withOpacity(0.7),
-                    fontSize: 10, fontFamily: 'Cairo')),
+                style: TextStyle(
+                    color: color.withOpacity(0.7),
+                    fontSize: 10,
+                    fontFamily: 'Cairo')),
           ]),
         ),
       );
@@ -348,8 +373,10 @@ class ClientsScreenState extends State<ClientsScreen>
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8, offset: const Offset(0, 2))
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2))
             ],
           ),
           child: Row(children: [
@@ -357,15 +384,18 @@ class ClientsScreenState extends State<ClientsScreen>
               Text(formatMontant(client.solde),
                   style: TextStyle(
                     color: client.solde > 0 ? _kRed : _kGreen,
-                    fontWeight: FontWeight.bold, fontSize: 15, fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    fontFamily: 'Cairo',
                   )),
               Text(client.solde > 0 ? Tr.s('took') : Tr.s('settled'),
-                  style: const TextStyle(color: Colors.grey,
-                      fontSize: 11, fontFamily: 'Cairo')),
+                  style: const TextStyle(
+                      color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
               if ((client.chequeCount ?? 0) > 0)
                 Container(
                   margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFA000).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
@@ -373,7 +403,8 @@ class ClientsScreenState extends State<ClientsScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.receipt_long, size: 10, color: Color(0xFFFFA000)),
+                      const Icon(Icons.receipt_long,
+                          size: 10, color: Color(0xFFFFA000)),
                       const SizedBox(width: 3),
                       Text('${client.chequeCount}',
                           style: const TextStyle(
@@ -389,28 +420,33 @@ class ClientsScreenState extends State<ClientsScreen>
             const Spacer(),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text(client.nom,
-                  style: const TextStyle(fontSize: 16,
-                      fontWeight: FontWeight.w600, fontFamily: 'Cairo')),
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Cairo')),
               if (client.telephone != null)
                 Text(client.telephone!,
-                    style: const TextStyle(color: Colors.grey,
-                        fontSize: 12, fontFamily: 'Cairo')),
+                    style: const TextStyle(
+                        color: Colors.grey, fontSize: 12, fontFamily: 'Cairo')),
               if (client.company != null)
                 Text(client.company!,
-                    style: const TextStyle(color: Colors.grey,
-                        fontSize: 11, fontFamily: 'Cairo')),
+                    style: const TextStyle(
+                        color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
             ]),
             const SizedBox(width: 12),
             Container(
-              width: 44, height: 44,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: _kPrimary.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
               child: Text(client.initiales,
-                  style: const TextStyle(color: _kPrimary,
-                      fontWeight: FontWeight.bold, fontSize: 18,
+                  style: const TextStyle(
+                      color: _kPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                       fontFamily: 'Cairo')),
             ),
           ]),
@@ -424,7 +460,8 @@ class ClientsScreenState extends State<ClientsScreen>
             widget.type == 'CLIENT'
                 ? Icons.people_outline
                 : Icons.local_shipping_outlined,
-            size: 72, color: Colors.grey.shade300,
+            size: 72,
+            color: Colors.grey.shade300,
           ),
           const SizedBox(height: 16),
           Text(
@@ -433,8 +470,8 @@ class ClientsScreenState extends State<ClientsScreen>
                 : widget.type == 'CLIENT'
                     ? Tr.s('no_clients')
                     : Tr.s('no_suppliers'),
-            style: const TextStyle(color: Colors.grey,
-                fontSize: 16, fontFamily: 'Cairo'),
+            style: const TextStyle(
+                color: Colors.grey, fontSize: 16, fontFamily: 'Cairo'),
           ),
           const SizedBox(height: 8),
           if (_filter != FilterOption.all || _search.isNotEmpty)
@@ -442,11 +479,13 @@ class ClientsScreenState extends State<ClientsScreen>
               onTap: () => setState(() {
                 _search = '';
                 _filter = FilterOption.all;
-                _sort   = SortOption.recentActivity;
+                _sort = SortOption.recentActivity;
               }),
               child: Text(Tr.s('clear_filter'),
-                  style: const TextStyle(color: _kPrimary,
-                      fontSize: 14, fontFamily: 'Cairo',
+                  style: const TextStyle(
+                      color: _kPrimary,
+                      fontSize: 14,
+                      fontFamily: 'Cairo',
                       decoration: TextDecoration.underline)),
             )
           else
@@ -454,12 +493,35 @@ class ClientsScreenState extends State<ClientsScreen>
               widget.type == 'CLIENT'
                   ? Tr.s('add_first_client')
                   : Tr.s('add_first_supplier'),
-              style: const TextStyle(color: Colors.grey,
-                  fontSize: 13, fontFamily: 'Cairo'),
+              style: const TextStyle(
+                  color: Colors.grey, fontSize: 13, fontFamily: 'Cairo'),
               textAlign: TextAlign.center,
             ),
         ]),
       );
+  Future<void> _printAllClients() async {
+    if (_clients.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              widget.type == 'CLIENT'
+                  ? Tr.s('no_clients')
+                  : Tr.s('no_suppliers'),
+              style: const TextStyle(fontFamily: 'Cairo'))));
+      return;
+    }
+    try {
+      final rows =
+          await DatabaseHelper.instance.getClientsReportData(widget.type);
+      await PdfService.instance.printAllClientsReport(rows, widget.type);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('${Tr.s('error_prefix')} $e',
+                style: const TextStyle(fontFamily: 'Cairo')),
+            backgroundColor: Colors.red));
+      }
+    }
+  }
 
   void _ouvrirClient(Client client) {
     Navigator.push(
@@ -473,7 +535,7 @@ class ClientsScreenState extends State<ClientsScreen>
 //  FILTER BOTTOM SHEET
 // ════════════════════════════════════════════════════════════════════════════════
 class _FilterSheet extends StatefulWidget {
-  final SortOption   currentSort;
+  final SortOption currentSort;
   final FilterOption currentFilter;
   final void Function(SortOption, FilterOption) onApply;
 
@@ -488,21 +550,21 @@ class _FilterSheet extends StatefulWidget {
 }
 
 class _FilterSheetState extends State<_FilterSheet> {
-  late SortOption   _sort;
+  late SortOption _sort;
   late FilterOption _filter;
 
   @override
   void initState() {
     super.initState();
-    _sort   = widget.currentSort;
+    _sort = widget.currentSort;
     _filter = widget.currentFilter;
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme  = Theme.of(context);
+    final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg     = isDark ? const Color(0xFF1E1E2E) : Colors.white;
+    final bg = isDark ? const Color(0xFF1E1E2E) : Colors.white;
 
     return Container(
       decoration: BoxDecoration(
@@ -512,8 +574,11 @@ class _FilterSheetState extends State<_FilterSheet> {
       padding: const EdgeInsets.all(24),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         // Handle
-        Container(width: 40, height: 4,
-            decoration: BoxDecoration(color: Colors.grey.shade300,
+        Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2))),
         const SizedBox(height: 20),
 
@@ -521,15 +586,17 @@ class _FilterSheetState extends State<_FilterSheet> {
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           GestureDetector(
             onTap: () => setState(() {
-              _sort   = SortOption.recentActivity;
+              _sort = SortOption.recentActivity;
               _filter = FilterOption.all;
             }),
             child: Text(Tr.s('clear_all'),
-                style: const TextStyle(color: _kPrimary, fontFamily: 'Cairo',
-                    fontSize: 14)),
+                style: const TextStyle(
+                    color: _kPrimary, fontFamily: 'Cairo', fontSize: 14)),
           ),
           Text(Tr.s('sort_filter_title'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
+              style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                   fontFamily: 'Cairo')),
           GestureDetector(
             onTap: () => Navigator.pop(context),
@@ -543,11 +610,11 @@ class _FilterSheetState extends State<_FilterSheet> {
         const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
           _sortChip(SortOption.recentActivity, Tr.s('sort_recent')),
-          _sortChip(SortOption.debtHigh,       Tr.s('sort_debt_high')),
-          _sortChip(SortOption.debtLow,        Tr.s('sort_debt_low')),
-          _sortChip(SortOption.nameAZ,         Tr.s('sort_name_az')),
-          _sortChip(SortOption.nameZA,         Tr.s('sort_name_za')),
-          _sortChip(SortOption.oldest,         Tr.s('sort_oldest')),
+          _sortChip(SortOption.debtHigh, Tr.s('sort_debt_high')),
+          _sortChip(SortOption.debtLow, Tr.s('sort_debt_low')),
+          _sortChip(SortOption.nameAZ, Tr.s('sort_name_az')),
+          _sortChip(SortOption.nameZA, Tr.s('sort_name_za')),
+          _sortChip(SortOption.oldest, Tr.s('sort_oldest')),
         ]),
         const SizedBox(height: 20),
 
@@ -555,16 +622,17 @@ class _FilterSheetState extends State<_FilterSheet> {
         _sectionLabel(Tr.s('filter_label')),
         const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
-          _filterChip(FilterOption.all,       Tr.s('filter_all')),
-          _filterChip(FilterOption.withDebt,  Tr.s('filter_with_debt')),
-          _filterChip(FilterOption.settled,   Tr.s('filter_settled')),
+          _filterChip(FilterOption.all, Tr.s('filter_all')),
+          _filterChip(FilterOption.withDebt, Tr.s('filter_with_debt')),
+          _filterChip(FilterOption.settled, Tr.s('filter_settled')),
           _filterChip(FilterOption.hasCheque, Tr.s('filter_has_cheque')),
         ]),
         const SizedBox(height: 28),
 
         // Apply
         SizedBox(
-          width: double.infinity, height: 52,
+          width: double.infinity,
+          height: 52,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: _kPrimary,
@@ -576,8 +644,11 @@ class _FilterSheetState extends State<_FilterSheet> {
               Navigator.pop(context);
             },
             child: Text(Tr.s('apply'),
-                style: const TextStyle(color: Colors.white, fontSize: 16,
-                    fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Cairo')),
           ),
         ),
         const SizedBox(height: 8),
@@ -588,8 +659,11 @@ class _FilterSheetState extends State<_FilterSheet> {
   Widget _sectionLabel(String label) => Align(
         alignment: Alignment.centerRight,
         child: Text(label,
-            style: const TextStyle(color: Colors.grey, fontSize: 13,
-                fontFamily: 'Cairo', fontWeight: FontWeight.w600)),
+            style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 13,
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w600)),
       );
 
   Widget _sortChip(SortOption option, String label) {
@@ -605,7 +679,8 @@ class _FilterSheetState extends State<_FilterSheet> {
         child: Text(label,
             style: TextStyle(
               color: selected ? Colors.white : _kPrimary,
-              fontFamily: 'Cairo', fontSize: 13,
+              fontFamily: 'Cairo',
+              fontSize: 13,
               fontWeight: selected ? FontWeight.bold : FontWeight.normal,
             )),
       ),
@@ -625,7 +700,8 @@ class _FilterSheetState extends State<_FilterSheet> {
         child: Text(label,
             style: TextStyle(
               color: selected ? Colors.white : _kPrimary,
-              fontFamily: 'Cairo', fontSize: 13,
+              fontFamily: 'Cairo',
+              fontSize: 13,
               fontWeight: selected ? FontWeight.bold : FontWeight.normal,
             )),
       ),

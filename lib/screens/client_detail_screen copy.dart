@@ -483,18 +483,16 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isCredit
-                  ? Colors.transparent
-                  : _kGreen, // أعطيت فارغة، أخذت مملوءة
+              color: isCredit ? _kGreen : Colors.transparent,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isCredit ? _kRed : _kGreen,
+                color: isCredit ? _kGreen : _kRed,
                 width: 2,
               ),
             ),
             child: Icon(
-              isCredit ? Icons.arrow_upward : Icons.arrow_downward,
-              color: isCredit ? _kRed : Colors.white,
+              isCredit ? Icons.arrow_downward : Icons.arrow_upward,
+              color: isCredit ? Colors.white : _kRed,
               size: 24,
             ),
           ),
@@ -535,11 +533,11 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
               ),
             ),
             Text(
-              isCredit ? Tr.s('gave') : Tr.s('took'),
+              isCredit ? Tr.s('took') : Tr.s('gave'),
               style: TextStyle(
                 color: isCredit
-                    ? _kRed.withOpacity(0.7)
-                    : _kGreen.withOpacity(0.7),
+                    ? _kGreen.withOpacity(0.7)
+                    : _kRed.withOpacity(0.7),
                 fontSize: 12,
                 fontFamily: 'Cairo',
               ),
@@ -671,42 +669,39 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                 offset: const Offset(0, -3))
           ],
         ),
-        child: Row(children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                // ✅ أعطيت = أحمر فاتح
-                backgroundColor: _kGreen,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: _ajouterPaiement,
-              icon: const Icon(Icons.arrow_upward),
-              label: Text(Tr.s('took'),
-                  style: const TextStyle(fontFamily: 'Cairo')),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                // ✅ أخذت = أخضر مملوء
-                backgroundColor: _kRed.withOpacity(0.7),
-                foregroundColor: _kRed,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: _ajouterCredit,
-              icon: const Icon(Icons.arrow_downward),
-              label: Text(Tr.s('gave'),
-                  style: const TextStyle(fontFamily: 'Cairo')),
-            ),
-          ),
-        ]),
+        child: Row(children: [// زر أخذت — أخضر فاتح (يسار)
+Expanded(
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: _kRed.withOpacity(0.12),
+      foregroundColor: _kRed,
+      elevation: 0,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14)),
+    ),
+    onPressed: _ajouterCredit,
+    child: Text(Tr.s('took'),
+        style: const TextStyle(fontFamily: 'Cairo', fontSize: 16)),
+  ),
+),
+const SizedBox(width: 12),
+// زر أعطيت — أحمر فاتح (يمين)
+Expanded(
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: _kGreen.withOpacity(0.12),
+      foregroundColor: _kGreen,
+      elevation: 0,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14)),
+    ),
+    onPressed: _ajouterPaiement,
+    child: Text(Tr.s('gave'),
+        style: const TextStyle(fontFamily: 'Cairo', fontSize: 16)),
+  ),
+),]),
       );
   void _ajouterCredit() => showModalBottomSheet(
         context: context,

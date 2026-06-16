@@ -4,8 +4,7 @@ import 'package:flutter/services.dart';
 import '../database_helper.dart';
 import '../utils/helpers.dart';
 import '../utils/app_translations.dart';
-import 'package:credit_karnet/services/image_encryption_service.dart';
-
+import '../services/image_encryption_service.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
 const _kGreen   = Color(0xFF388E3C);
@@ -36,8 +35,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   void initState() {
     super.initState();
     _tx = Map<String, dynamic>.from(widget.tx);
-    
-
   }
 
   bool    get _isCredit => _tx['type'] == 'CREDIT';
@@ -46,6 +43,104 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   String  get _dateStr  => _tx['date'] as String;
   String? get _desc     => _tx['description'] as String?;
   String? get _img      => _tx['imagePath']   as String?;
+
+  // ── Widget عرض الصورة مع فك التشفير ──────────────────────────────────────
+  Widget _buildImage(String imagePath) {
+    final svc = ImageEncryptionService.instance;
+
+    if (!File(imagePath).existsSync()) {
+      return Container(
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.image_not_supported_outlined, color: Colors.grey, size: 28),
+            SizedBox(height: 4),
+            Text('الصورة غير متوفرة',
+                style: TextStyle(color: Colors.grey, fontSize: 11, fontFamily: 'Cairo')),
+          ]),
+        ),
+      );
+    }
+
+    if (!svc.isEncrypted(imagePath)) {
+      return Image.file(File(imagePath), fit: BoxFit.cover);
+    }
+
+    return FutureBuilder<File?>(
+      future: svc.decryptImageToTemp(imagePath),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 180,
+            child: Center(
+              child: CircularProgressIndicator(color: _kPrimary, strokeWidth: 2),
+            ),
+          );
+        }
+        if (snapshot.data == null) {
+          return Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Center(
+              child: Icon(Icons.image_not_supported_outlined, color: Colors.grey, size: 28),
+            ),
+          );
+        }
+        return Image.file(snapshot.data!, fit: BoxFit.cover);
+      },
+    );
+  }
+
+  // ── عرض الصورة كاملة مع فك التشفير ──────────────────────────────────────
+  void _showFullImage() async {
+    if (_img == null) return;
+    final svc = ImageEncryptionService.instance;
+    File? displayFile;
+    bool isTempFile = false;
+
+    if (!File(_img!).existsSync()) return;
+
+    if (svc.isEncrypted(_img!)) {
+      displayFile = await svc.decryptImageToTemp(_img!);
+      isTempFile = true;
+    } else {
+      displayFile = File(_img!);
+    }
+
+    if (displayFile == null || !mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(children: [
+          InteractiveViewer(
+            panEnabled: true,
+            scaleEnabled: true,
+            child: Center(child: Image.file(displayFile!, fit: BoxFit.contain)),
+          ),
+          Positioned(
+            top: 40,
+            right: 10,
+            child: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close, color: Colors.white, size: 30),
+            ),
+          ),
+        ]),
+      ),
+    );
+
+    if (isTempFile) await svc.deleteTempFile(displayFile!.path);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +181,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // ── Date ─────────────────────────────────────────────────────────
+            // ── Date ─────────────────────────────────────────────────────
             Text(
               Tr.formatTxDate(_dateStr),
               style: TextStyle(
@@ -97,7 +192,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 6),
 
-            // ── Type label ───────────────────────────────────────────────────
+            // ── Type label ───────────────────────────────────────────────
             Text(
               _isCredit ? Tr.s('took_label') : Tr.s('gave_label'),
               style: TextStyle(
@@ -105,7 +200,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 8),
 
-            // ── Amount ───────────────────────────────────────────────────────
+            // ── Amount ───────────────────────────────────────────────────
             Text(
               formatMontant(_amount),
               style: TextStyle(
@@ -118,12 +213,11 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ── Balance chip ─────────────────────────────────────────────────
+            // ── Balance chip ─────────────────────────────────────────────
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _kGreen.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
@@ -137,7 +231,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ── Description ──────────────────────────────────────────────────
+            // ── Description ──────────────────────────────────────────────
             if (_desc != null && _desc!.isNotEmpty) ...[
               Container(
                 width: double.infinity,
@@ -156,7 +250,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               const SizedBox(height: 12),
             ],
 
-            // ── Image ────────────────────────────────────────────────────────
+            // ── Image ────────────────────────────────────────────────────
             if (_img != null && _img!.isNotEmpty)
               GestureDetector(
                 onTap: _showFullImage,
@@ -173,15 +267,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
-                    child: Image.file(File(_img!), fit: BoxFit.cover),
+                    child: _buildImage(_img!), // ← فك التشفير تلقائي
                   ),
                 ),
               ),
 
-            // ── "Recorded" badge ─────────────────────────────────────────────
+            // ── "Recorded" badge ─────────────────────────────────────────
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: badgeBg,
                 borderRadius: BorderRadius.circular(20),
@@ -197,7 +290,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
             const Spacer(),
 
-            // ── Edit button ──────────────────────────────────────────────────
+            // ── Edit button ──────────────────────────────────────────────
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Column(children: [
@@ -210,8 +303,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       color: _kBlue.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.edit_outlined,
-                        color: _kBlue, size: 26),
+                    child: const Icon(Icons.edit_outlined, color: _kBlue, size: 26),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -224,7 +316,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ── Copy / Delete buttons ────────────────────────────────────────
+            // ── Copy / Delete buttons ────────────────────────────────────
             Row(children: [
               Expanded(
                 child: ElevatedButton(
@@ -238,9 +330,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   onPressed: _shareTx,
                   child: Text(Tr.s('copy'),
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Cairo',
-                          fontSize: 16)),
+                          color: Colors.white, fontFamily: 'Cairo', fontSize: 16)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -256,9 +346,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   onPressed: _confirmDelete,
                   child: Text(Tr.s('delete'),
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Cairo',
-                          fontSize: 16)),
+                          color: Colors.white, fontFamily: 'Cairo', fontSize: 16)),
                 ),
               ),
             ]),
@@ -268,7 +356,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     );
   }
 
-  // ── Edit ────────────────────────────────────────────────────────────────────
+  // ── Edit ──────────────────────────────────────────────────────────────────
   void _editTransaction() {
     showModalBottomSheet(
       context: context,
@@ -334,15 +422,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     }
   }
 
-  // ── Delete ───────────────────────────────────────────────────────────────────
+  // ── Delete ────────────────────────────────────────────────────────────────
   Future<void> _confirmDelete() async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(Tr.s('delete_tx'),
             textAlign: Tr.textAlignStart,
-            style: const TextStyle(
-                fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
         content: Text(Tr.s('confirm_delete_tx'),
             textAlign: Tr.textAlignStart,
             style: const TextStyle(fontFamily: 'Cairo')),
@@ -374,11 +461,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       await db.delete('credits', where: 'id = ?', whereArgs: [id]);
     } else {
       final creditId = _tx['creditId'] as int;
-      final cRows =
-          await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
+      final cRows = await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
       if (cRows.isNotEmpty) {
-        double restant =
-            (cRows.first['montantRestant'] as num).toDouble() + _amount;
+        double restant = (cRows.first['montantRestant'] as num).toDouble() + _amount;
         final total = (cRows.first['montantTotal'] as num).toDouble();
         if (restant > total) restant = total;
         await db.update('credits', {'montantRestant': restant},
@@ -404,13 +489,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       return r.isEmpty ? null : r.first['clientId'] as int;
     } else {
       final creditId = _tx['creditId'] as int;
-      final r =
-          await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
+      final r = await db.query('credits', where: 'id = ?', whereArgs: [creditId]);
       return r.isEmpty ? null : r.first['clientId'] as int;
     }
   }
 
-  // ── Share / copy ─────────────────────────────────────────────────────────────
+  // ── Share ─────────────────────────────────────────────────────────────────
   void _shareTx() {
     final typeLabel = _isCredit ? Tr.s('took_label') : Tr.s('gave_label');
     final text =
@@ -425,37 +509,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       backgroundColor: _kBlue,
     ));
   }
-
-  // ── Full image ───────────────────────────────────────────────────────────────
-  void _showFullImage() {
-    if (_img == null) return;
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.black,
-        insetPadding: EdgeInsets.zero,
-        child: Stack(children: [
-          InteractiveViewer(
-            panEnabled: true,
-            scaleEnabled: true,
-            child:
-                Center(child: Image.file(File(_img!), fit: BoxFit.contain)),
-          ),
-          Positioned(
-            top: 40,
-            right: 10,
-            child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close,
-                    color: Colors.white, size: 30)),
-          ),
-        ]),
-      ),
-    );
-  }
 }
 
-// ── Edit sheet ──────────────────────────────────────────────────────────────────
+// ── Edit sheet ────────────────────────────────────────────────────────────────
 class _EditTxSheet extends StatefulWidget {
   final Map<String, dynamic> tx;
   final Future<void> Function(String? desc, double? amount) onSaved;
@@ -495,8 +551,7 @@ class _EditTxSheetState extends State<_EditTxSheet> {
     final isCredit  = widget.tx['type'] == 'CREDIT';
 
     return Container(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: BoxDecoration(
         color: sheetBg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -507,7 +562,6 @@ class _EditTxSheetState extends State<_EditTxSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Header
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -523,21 +577,16 @@ class _EditTxSheetState extends State<_EditTxSheet> {
             ]),
             const SizedBox(height: 16),
 
-            // Amount field
             TextField(
               controller: _amountCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textAlign: TextAlign.right,
-              style: TextStyle(
-                  fontFamily: 'Cairo', fontSize: 20, color: textColor),
+              style: TextStyle(fontFamily: 'Cairo', fontSize: 20, color: textColor),
               decoration: InputDecoration(
                 labelText: Tr.s('amount'),
-                labelStyle:
-                    TextStyle(fontFamily: 'Cairo', color: textColor),
+                labelStyle: TextStyle(fontFamily: 'Cairo', color: textColor),
                 prefixText: '${Tr.s('currency')}  ',
-                prefixStyle:
-                    const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
+                prefixStyle: const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
                 filled: true,
                 fillColor: fillColor,
                 border: OutlineInputBorder(
@@ -547,17 +596,14 @@ class _EditTxSheetState extends State<_EditTxSheet> {
             ),
             const SizedBox(height: 12),
 
-            // Description/note field
             TextField(
               controller: _descCtrl,
               textAlign: Tr.textAlignStart,
               maxLines: 2,
               style: TextStyle(fontFamily: 'Cairo', color: textColor),
               decoration: InputDecoration(
-                labelText:
-                    isCredit ? Tr.s('description') : Tr.s('note_optional'),
-                labelStyle:
-                    TextStyle(fontFamily: 'Cairo', color: textColor),
+                labelText: isCredit ? Tr.s('description') : Tr.s('note_optional'),
+                labelStyle: TextStyle(fontFamily: 'Cairo', color: textColor),
                 filled: true,
                 fillColor: fillColor,
                 border: OutlineInputBorder(
@@ -567,7 +613,6 @@ class _EditTxSheetState extends State<_EditTxSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Save button
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -582,9 +627,7 @@ class _EditTxSheetState extends State<_EditTxSheet> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(Tr.s('save_edit'),
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Cairo')),
+                            color: Colors.white, fontSize: 16, fontFamily: 'Cairo')),
               ),
             ),
           ],
@@ -594,8 +637,7 @@ class _EditTxSheetState extends State<_EditTxSheet> {
   }
 
   Future<void> _save() async {
-    final amount =
-        double.tryParse(_amountCtrl.text.replaceAll(',', '.'));
+    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', '.'));
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(Tr.s('enter_valid_amount'),
@@ -605,8 +647,7 @@ class _EditTxSheetState extends State<_EditTxSheet> {
     }
     setState(() => _saving = true);
     try {
-      final desc =
-          _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
+      final desc = _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
       await widget.onSaved(desc, amount);
       if (mounted) Navigator.pop(context);
     } catch (e) {

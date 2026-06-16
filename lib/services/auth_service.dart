@@ -1,10 +1,9 @@
-// lib/services/auth_service.dart
-// UltraMsg WhatsApp OTP — بدل Firebase SMS
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
+import '../database_helper.dart';
 
 class AuthService {
   static final AuthService instance = AuthService._();
@@ -12,15 +11,15 @@ class AuthService {
 
   // ── UltraMsg Config ──────────────────────────────────────────────────────────
   static const _ultraInstance = 'instance179286';
-  static const _ultraToken    = 'hkglj0sxcrhwrd68';
-  static const _ultraBaseUrl  = 'https://api.ultramsg.com';
+  static const _ultraToken = 'hkglj0sxcrhwrd68';
+  static const _ultraBaseUrl = 'https://api.ultramsg.com';
 
   static const _currentUserKey = 'current_user';
-  static const _usersDBKey     = 'users_database';
-  static const _isLoggedInKey  = 'is_logged_in';
-  static const _otpKey         = '_otp_temp';
-  static const _otpPhoneKey    = '_otp_phone';
-  static const _otpExpiryKey   = '_otp_expiry';
+  static const _usersDBKey = 'users_database';
+  static const _isLoggedInKey = 'is_logged_in';
+  static const _otpKey = '_otp_temp';
+  static const _otpPhoneKey = '_otp_phone';
+  static const _otpExpiryKey = '_otp_expiry';
 
   // ─────────────────────────────────────────────────────────────
   // Session
@@ -66,8 +65,8 @@ class AuthService {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'token': _ultraToken,
-          'to':    formattedPhone,
-          'body':  message,
+          'to': formattedPhone,
+          'body': message,
         },
       ).timeout(const Duration(seconds: 15));
 
@@ -99,9 +98,9 @@ class AuthService {
 
   Future<bool> verifyPhoneCode(String code) async {
     final p = await SharedPreferences.getInstance();
-    final savedOtp    = p.getString(_otpKey);
-    final expiryMs    = p.getInt(_otpExpiryKey) ?? 0;
-    final now         = DateTime.now().millisecondsSinceEpoch;
+    final savedOtp = p.getString(_otpKey);
+    final expiryMs = p.getInt(_otpExpiryKey) ?? 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
 
     // شيك انتهاء المدة
     if (now > expiryMs) return false;
@@ -117,7 +116,7 @@ class AuthService {
   Future<bool> completeRegistration(String username) async {
     if (username.isEmpty) return false;
 
-    final p     = await SharedPreferences.getInstance();
+    final p = await SharedPreferences.getInstance();
     final phone = p.getString(_otpPhoneKey) ?? '';
     if (phone.isEmpty) return false;
 
@@ -142,9 +141,9 @@ class AuthService {
     }
 
     final newUser = {
-      'id':           DateTime.now().millisecondsSinceEpoch,
-      'username':     finalUsername,
-      'phone':        phone,
+      'id': DateTime.now().millisecondsSinceEpoch,
+      'username': finalUsername,
+      'phone': phone,
       'dateCreation': DateTime.now().toIso8601String(),
     };
 
@@ -164,8 +163,8 @@ class AuthService {
 
   Future<bool> quickLogin(String phone) async {
     if (phone.isEmpty) return false;
-    final p             = await SharedPreferences.getInstance();
-    final users         = _getUsersDatabase(p);
+    final p = await SharedPreferences.getInstance();
+    final users = _getUsersDatabase(p);
     final formattedPhone = _formatPhone(phone);
 
     final existingUser = users.firstWhere(
@@ -186,8 +185,17 @@ class AuthService {
 
   Future<void> logout() async {
     final p = await SharedPreferences.getInstance();
+
+    // ✅ امسح بيانات SQLite
+    try {
+      await DatabaseHelper.instance.deleteAllData();
+    } catch (e) {
+      debugPrint('⚠️ Error clearing DB on logout: $e');
+    }
+
     await p.remove(_currentUserKey);
     await p.remove('user_phone');
+    await p.remove('last_auto_backup_ms');
     await p.setBool(_isLoggedInKey, false);
     _clearOtp(p);
   }

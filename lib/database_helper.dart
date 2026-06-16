@@ -632,6 +632,31 @@ for (final p in pRows) {
     ''', [clientId]);
     
     return (result.first['count'] as int?) ?? 0;
+ 
   }
-  
+  /// بيانات تقرير شامل لكل العملاء/الموردين (لكل واحد: أخذ، أعطى، الرصيد)
+  Future<List<Map<String, dynamic>>> getClientsReportData(String type) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT cl.id, cl.nom, cl.telephone, cl.company,
+        COALESCE(SUM(c.montantTotal), 0) as totalCredit,
+        COALESCE(SUM(c.montantTotal - c.montantRestant), 0) as totalPaye,
+        COALESCE(SUM(c.montantRestant), 0) as solde
+      FROM clients cl
+      LEFT JOIN credits c ON c.clientId = cl.id
+      WHERE cl.type = ?
+      GROUP BY cl.id
+      ORDER BY cl.nom ASC
+    ''', [type]);
+
+    return result.map((row) => {
+      'id': row['id'],
+      'nom': row['nom'] as String,
+      'telephone': row['telephone'] as String?,
+      'company': row['company'] as String?,
+      'totalCredit': (row['totalCredit'] as num).toDouble(),
+      'totalPaye': (row['totalPaye'] as num).toDouble(),
+      'solde': (row['solde'] as num).toDouble(),
+    }).toList();
+  }
 }
