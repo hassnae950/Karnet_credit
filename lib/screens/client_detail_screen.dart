@@ -694,7 +694,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 // ✅ أخذت = أخضر مملوء
-                backgroundColor: _kRed.withOpacity(0.7),
+                backgroundColor: _kRed.withOpacity(0.2),
                 foregroundColor: _kRed,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

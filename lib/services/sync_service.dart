@@ -44,7 +44,11 @@ class SyncService extends ChangeNotifier {
       final allData = await DatabaseHelper.instance.exportAllData();
       final userDocRef = _fs.collection('users').doc(phoneNumber);
       final collections = [
-        'clients', 'credits', 'paiements', 'cheques', 'categories'
+        'clients',
+        'credits',
+        'paiements',
+        'cheques',
+        'categories'
       ];
 
       // ✅ الخطوة 1: امسح كل الـ collections القديمة أولاً
@@ -69,41 +73,35 @@ class SyncService extends ChangeNotifier {
 
       if (allData['clients'] != null) {
         for (var client in allData['clients'] as List) {
-          final doc = userDocRef
-              .collection('clients')
-              .doc(client['id'].toString());
+          final doc =
+              userDocRef.collection('clients').doc(client['id'].toString());
           writeBatch.set(doc, _sanitizeData(client));
         }
       }
       if (allData['credits'] != null) {
         for (var credit in allData['credits'] as List) {
-          final doc = userDocRef
-              .collection('credits')
-              .doc(credit['id'].toString());
+          final doc =
+              userDocRef.collection('credits').doc(credit['id'].toString());
           writeBatch.set(doc, _sanitizeData(credit));
         }
       }
       if (allData['paiements'] != null) {
         for (var p in allData['paiements'] as List) {
-          final doc = userDocRef
-              .collection('paiements')
-              .doc(p['id'].toString());
+          final doc =
+              userDocRef.collection('paiements').doc(p['id'].toString());
           writeBatch.set(doc, _sanitizeData(p));
         }
       }
       if (allData['cheques'] != null) {
         for (var ch in allData['cheques'] as List) {
-          final doc = userDocRef
-              .collection('cheques')
-              .doc(ch['id'].toString());
+          final doc = userDocRef.collection('cheques').doc(ch['id'].toString());
           writeBatch.set(doc, _sanitizeData(ch));
         }
       }
       if (allData['categories'] != null) {
         for (var cat in allData['categories'] as List) {
-          final doc = userDocRef
-              .collection('categories')
-              .doc(cat['id'].toString());
+          final doc =
+              userDocRef.collection('categories').doc(cat['id'].toString());
           writeBatch.set(doc, _sanitizeData(cat));
         }
       }
@@ -116,10 +114,10 @@ class SyncService extends ChangeNotifier {
           'appVersion': '2.0.0',
           'deviceId': _getDeviceId(),
           'tablesCount': {
-            'clients':    (allData['clients']    as List?)?.length ?? 0,
-            'credits':    (allData['credits']    as List?)?.length ?? 0,
-            'paiements':  (allData['paiements']  as List?)?.length ?? 0,
-            'cheques':    (allData['cheques']    as List?)?.length ?? 0,
+            'clients': (allData['clients'] as List?)?.length ?? 0,
+            'credits': (allData['credits'] as List?)?.length ?? 0,
+            'paiements': (allData['paiements'] as List?)?.length ?? 0,
+            'cheques': (allData['cheques'] as List?)?.length ?? 0,
             'categories': (allData['categories'] as List?)?.length ?? 0,
           },
         },
@@ -155,8 +153,8 @@ class SyncService extends ChangeNotifier {
   // ── صور: فك تشفير → base64 → Firestore ─────────────────────────────────────
   Future<void> _backupImages(String phoneNumber) async {
     try {
-      final imagesMap = await ImageEncryptionService.instance
-          .exportDecryptedImagesAsBase64();
+      final imagesMap =
+          await ImageEncryptionService.instance.exportDecryptedImagesAsBase64();
 
       if (imagesMap.isEmpty) {
         print('ℹ️ No images to backup');
@@ -229,8 +227,7 @@ class SyncService extends ChangeNotifier {
 
       final userRef = _fs.collection('users').doc(phoneNumber);
 
-      final clientsCheck =
-          await userRef.collection('clients').limit(1).get();
+      final clientsCheck = await userRef.collection('clients').limit(1).get();
       if (clientsCheck.docs.isEmpty) {
         _syncStatus = Tr.s('no_backup_found');
         _isSyncing = false;
@@ -240,7 +237,11 @@ class SyncService extends ChangeNotifier {
 
       final data = <String, List<Map<String, dynamic>>>{};
       final collections = [
-        'clients', 'credits', 'paiements', 'cheques', 'categories'
+        'clients',
+        'credits',
+        'paiements',
+        'cheques',
+        'categories'
       ];
 
       for (final collName in collections) {
@@ -248,15 +249,16 @@ class SyncService extends ChangeNotifier {
           final docs = await userRef.collection(collName).get();
           data[collName] = docs.docs.map((doc) {
             final map = Map<String, dynamic>.from(doc.data());
-            for (final key in [
-              'id', 'clientId', 'creditId', 'categoryId'
-            ]) {
+            for (final key in ['id', 'clientId', 'creditId', 'categoryId']) {
               if (map[key] != null) {
                 map[key] = int.tryParse(map[key].toString()) ?? map[key];
               }
             }
             for (final key in [
-              'montantTotal', 'montantRestant', 'montant', 'solde'
+              'montantTotal',
+              'montantRestant',
+              'montant',
+              'solde'
             ]) {
               if (map[key] != null) {
                 map[key] = (map[key] as num).toDouble();
@@ -328,13 +330,17 @@ class SyncService extends ChangeNotifier {
   // ═══════════════════════════════════════════════════════════════════════════
   //  CHECK & FETCH
   // ═══════════════════════════════════════════════════════════════════════════
-
   Future<bool> backupExistsForPhone(String phoneNumber) async {
     if (!await hasInternetConnection()) return false;
     try {
-      final snapshot =
-          await _fs.collection('users').doc(phoneNumber).get();
-      return snapshot.exists;
+      // نشيكيو clients sub-collection مباشرة — مو parent doc
+      final snap = await _fs
+          .collection('users')
+          .doc(phoneNumber)
+          .collection('clients')
+          .limit(1)
+          .get();
+      return snap.docs.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -413,8 +419,7 @@ class SyncService extends ChangeNotifier {
     }
   }
 
-  String _getDeviceId() =>
-      DateTime.now().millisecondsSinceEpoch.toString();
+  String _getDeviceId() => DateTime.now().millisecondsSinceEpoch.toString();
 
   String _mapFirebaseError(FirebaseException e) {
     switch (e.code) {
@@ -444,8 +449,13 @@ class SyncService extends ChangeNotifier {
     try {
       final userDocRef = _fs.collection('users').doc(phoneNumber);
       final collections = [
-        'clients', 'credits', 'paiements', 'cheques',
-        'categories', '_metadata', '_images',
+        'clients',
+        'credits',
+        'paiements',
+        'cheques',
+        'categories',
+        '_metadata',
+        '_images',
       ];
       for (final collName in collections) {
         final snap = await userDocRef.collection(collName).get();

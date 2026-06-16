@@ -10,138 +10,65 @@ class PdfService {
   static final PdfService instance = PdfService._();
   PdfService._();
 
-  // ── Colors ──────────────────────────────────────────────────────────────────
-  static const _green = PdfColor.fromInt(0xFF1B8A6B);
-  static const _red = PdfColor.fromInt(0xFFD32F2F);
-  static const _grey = PdfColor.fromInt(0xFF757575);
+  // ── Colors ───────────────────────────────────────────────────────────────────
+  static const _green  = PdfColor.fromInt(0xFF1B8A6B);
+  static const _red    = PdfColor.fromInt(0xFFD32F2F);
+  static const _grey   = PdfColor.fromInt(0xFF757575);
   static const _bgGrey = PdfColor.fromInt(0xFFF5F6FA);
 
-  // ── Load fonts from assets (offline) ────────────────────────────────────────
+  // ── Load fonts ───────────────────────────────────────────────────────────────
   Future<pw.Font> _loadFont(String asset) async {
     final data = await rootBundle.load(asset);
     return pw.Font.ttf(data);
   }
 
   // ── Translated labels ────────────────────────────────────────────────────────
-  String get _total => Tr.s('total_label');
-  String get _paid => Tr.s('paid_label');
-  String get _remaining => Tr.s('remaining');
-  String get _openCredit => Tr.s('credit_label');
-  String get _txDetails => Tr.s('transactions');
-  String get _noTx => Tr.s('no_transactions');
-  String get _payments => Tr.s('payment_label');
-  String get _settled => Tr.s('settled');
-  String get _ongoing => Tr.s('took');
-  String get _appName => Tr.s('app_title');
+  String get _total       => Tr.s('total_label');
+  String get _paid        => Tr.s('paid_label');
+  String get _remaining   => Tr.s('remaining');
+  String get _openCredit  => Tr.s('credit_label');
+  String get _txDetails   => Tr.s('transactions');
+  String get _noTx        => Tr.s('no_transactions');
+  String get _payments    => Tr.s('payment_label');
+  String get _settled     => Tr.s('settled');
+  String get _ongoing     => Tr.s('took');
+  String get _appName     => Tr.s('app_title');
   String get _reportLabel => Tr.s('report');
-  String get _currency => Tr.s('currency');
+  String get _currency    => Tr.s('currency'); // ✅ درهم / MAD / DH حسب اللغة
+  String get _balance     => Tr.s('balance');
+  String get _summary     => Tr.currentLang == 'fr'
+      ? 'Résumé client'
+      : (Tr.currentLang == 'en' ? 'Client Summary' : 'ملخص العميل');
+  String get _issueDate   => Tr.currentLang == 'fr'
+      ? "Date d'émission:"
+      : (Tr.currentLang == 'en' ? 'Issue date:' : 'تاريخ الإصدار:');
   String get _pageOf => Tr.currentLang == 'fr'
       ? 'Page'
       : (Tr.currentLang == 'en' ? 'Page' : 'صفحة');
-  String get _of =>
-      Tr.currentLang == 'fr' ? 'sur' : (Tr.currentLang == 'en' ? 'of' : 'من');
+  String get _of => Tr.currentLang == 'fr'
+      ? 'sur'
+      : (Tr.currentLang == 'en' ? 'of' : 'من');
   String get _createdBy => Tr.currentLang == 'fr'
-      ? 'Créé par ${_appName}'
+      ? 'Créé par $_appName'
       : (Tr.currentLang == 'en'
           ? 'Created by $_appName'
           : 'تم الإنشاء بتطبيق $_appName');
-  String get _balance => Tr.s('balance');
-  String get _summary => Tr.currentLang == 'fr'
-      ? 'Résumé client'
-      : (Tr.currentLang == 'en' ? 'Client Summary' : 'ملخص العميل');
-  String get _issueDate => Tr.currentLang == 'fr'
-      ? "Date d'émission:"
-      : (Tr.currentLang == 'en' ? 'Issue date:' : 'تاريخ الإصدار:');
 
-  // ════════════════════════════════════════════════════════════════════════════
-  //  SINGLE CLIENT REPORT — تقرير عميل واحد كامل
-  // ════════════════════════════════════════════════════════════════════════════
-  Future<void> printClientReport(
-    Client client,
-    List<Credit> credits,
-    Map<int, List<Paiement>> paiementsMap,
-  ) async {
-    final font = await _loadFont('assets/fonts/Cairo-Regular.ttf');
-    final fontBold = await _loadFont('assets/fonts/Cairo-Bold.ttf');
-
-    final totalDonne = credits.fold(0.0, (s, c) => s + c.montantTotal);
-    final totalRestant = credits.fold(0.0, (s, c) => s + c.montantRestant);
-    final totalPaye = totalDonne - totalRestant;
-    final nbOuverts = credits.where((c) => !c.estSolde).length;
-
-    final pdf = pw.Document(
-      theme: pw.ThemeData.withFont(base: font, bold: fontBold),
-    );
-
-    final isAr = Tr.currentLang == 'ar';
-    final pageDir = isAr ? pw.TextDirection.rtl : pw.TextDirection.ltr;
-    final textDir = pageDir;
-
-    pdf.addPage(pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      textDirection: pageDir,
-      margin: const pw.EdgeInsets.all(32),
-      header: (ctx) => _buildHeader(client, font, fontBold, textDir),
-      footer: (ctx) => _buildFooter(ctx, font),
-      build: (ctx) => [
-        _summaryRow(
-            totalDonne, totalPaye, totalRestant, nbOuverts, font, fontBold),
-        pw.SizedBox(height: 24),
-        _sectionTitle(_txDetails, font, fontBold),
-        pw.SizedBox(height: 12),
-        if (credits.isEmpty)
-          pw.Center(
-              child: pw.Text(_noTx,
-                  style: pw.TextStyle(font: font, color: _grey)))
-        else
-          ...credits.map((credit) {
-            final paiements = paiementsMap[credit.id!] ?? [];
-            return _creditBlock(credit, paiements, font, fontBold, textDir);
-          }),
-      ],
-    ));
-
-    await Printing.layoutPdf(onLayout: (_) => pdf.save());
-  }
-
-  // ── HEADER ───────────────────────────────────────────────────────────────────
-  pw.Widget _buildHeader(
-      Client client, pw.Font font, pw.Font bold, pw.TextDirection textDir) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.fromLTRB(0, 0, 0, 16),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: _green, width: 2)),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-            pw.Text(formatDate(DateTime.now()),
-                style: pw.TextStyle(font: font, color: _grey, fontSize: 10)),
-            pw.Text('$_appName — $_reportLabel',
-                style: pw.TextStyle(font: font, color: _grey, fontSize: 9)),
-          ]),
-          pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-            pw.Directionality(
-              textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch(client.nom)
-                  ? pw.TextDirection.rtl
-                  : pw.TextDirection.ltr,
-              child: pw.Text(client.nom,
-                  style: pw.TextStyle(font: bold, fontSize: 22, color: _green)),
-            ),
-            if (client.telephone != null)
-              pw.Text(client.telephone!,
-                  style: pw.TextStyle(font: font, fontSize: 11, color: _grey)),
-            if (client.company != null)
-              pw.Text(client.company!,
-                  style: pw.TextStyle(font: font, fontSize: 11, color: _grey)),
-          ]),
-        ],
-      ),
+  // ── Arabic text helper ───────────────────────────────────────────────────────
+  pw.Widget _txt(String text, pw.TextStyle style, {pw.TextAlign? align}) {
+    final isArabic = RegExp(r'[؀-ۿ]').hasMatch(text);
+    return pw.Directionality(
+      textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+      child: pw.Text(text, style: style,
+          textAlign: align ?? pw.TextAlign.start),
     );
   }
 
-  // ── FOOTER ───────────────────────────────────────────────────────────────────
+  // ── Shared vertical line ─────────────────────────────────────────────────────
+  pw.Widget _vLine() =>
+      pw.Container(width: 0.5, height: 36, color: PdfColors.grey300);
+
+  // ── FOOTER (shared) ──────────────────────────────────────────────────────────
   pw.Widget _buildFooter(pw.Context ctx, pw.Font font) {
     return pw.Container(
       padding: const pw.EdgeInsets.only(top: 8),
@@ -161,274 +88,355 @@ class PdfService {
     );
   }
 
-  // ── SUMMARY ROW (single client) ──────────────────────────────────────────────
-  pw.Widget _summaryRow(double total, double paye, double restant,
-      int nbOuverts, pw.Font font, pw.Font bold) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
+  // ════════════════════════════════════════════════════════════════════════════
+  //  SINGLE CLIENT REPORT — جدول المعاملات
+  // ════════════════════════════════════════════════════════════════════════════
+  Future<void> printClientReport(
+    Client client,
+    List<Credit> credits,
+    Map<int, List<Paiement>> paiementsMap,
+  ) async {
+    final font     = await _loadFont('assets/fonts/Cairo-Regular.ttf');
+    final fontBold = await _loadFont('assets/fonts/Cairo-Bold.ttf');
+
+    final isAr    = Tr.currentLang == 'ar';
+    final pageDir = isAr ? pw.TextDirection.rtl : pw.TextDirection.ltr;
+
+    // ── بناء قائمة المعاملات مرتبة بالتاريخ ────────────────────────────────
+    final List<Map<String, dynamic>> txList = [];
+
+    for (final credit in credits) {
+      txList.add({
+        'date'  : credit.dateCredit,
+        'note'  : credit.description ?? '',
+        'credit': credit.montantTotal,
+        'debit' : 0.0,
+      });
+      final paiements = paiementsMap[credit.id!] ?? [];
+      for (final p in paiements) {
+        txList.add({
+          'date'  : p.datePaiement,
+          'note'  : p.note ?? '',
+          'credit': 0.0,
+          'debit' : p.montant,
+        });
+      }
+    }
+
+    txList.sort((a, b) =>
+        (a['date'] as DateTime).compareTo(b['date'] as DateTime));
+
+    double running = 0;
+    for (final tx in txList) {
+      running += (tx['credit'] as double) - (tx['debit'] as double);
+      tx['balance'] = running;
+    }
+
+    final totalCredit =
+        txList.fold(0.0, (s, t) => s + (t['credit'] as double));
+    final totalDebit =
+        txList.fold(0.0, (s, t) => s + (t['debit'] as double));
+    final solde = totalCredit - totalDebit;
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(base: font, bold: fontBold),
+    );
+
+    pdf.addPage(pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      textDirection: pageDir,
+      margin: const pw.EdgeInsets.all(32),
+      header: (ctx) => _buildClientHeader(
+          client, solde, totalCredit, totalDebit, txList.length, font, fontBold),
+      footer: (ctx) => _buildFooter(ctx, font),
+      build: (ctx) => [
+        pw.SizedBox(height: 16),
+        if (txList.isEmpty)
+          pw.Center(
+              child: pw.Text(_noTx,
+                  style: pw.TextStyle(font: font, color: _grey)))
+        else
+          _txTable(txList, totalCredit, totalDebit, font, fontBold),
+      ],
+    ));
+
+    await Printing.layoutPdf(onLayout: (_) => pdf.save());
+  }
+
+  // ── Header ديال عميل واحد ────────────────────────────────────────────────────
+  pw.Widget _buildClientHeader(
+      Client client,
+      double solde,
+      double totalCredit,
+      double totalDebit,
+      int txCount,
+      pw.Font font,
+      pw.Font bold) {
+    final nameRow = pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text(formatDate(DateTime.now()),
+              style: pw.TextStyle(font: font, color: _grey, fontSize: 10)),
+          pw.Text('$_appName — $_reportLabel',
+              style: pw.TextStyle(font: font, color: _grey, fontSize: 9)),
+        ]),
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+          pw.Directionality(
+            textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch(client.nom)
+                ? pw.TextDirection.rtl
+                : pw.TextDirection.ltr,
+            child: pw.Text(client.nom,
+                style: pw.TextStyle(font: bold, fontSize: 20, color: _green)),
+          ),
+          if (client.telephone != null)
+            pw.Text(client.telephone!,
+                style: pw.TextStyle(font: font, fontSize: 10, color: _grey)),
+          if (client.company != null)
+            pw.Text(client.company!,
+                style: pw.TextStyle(font: font, fontSize: 10, color: _grey)),
+        ]),
+      ],
+    );
+
+    final statsBar = pw.Container(
+      margin: const pw.EdgeInsets.only(top: 12),
+      padding: const pw.EdgeInsets.all(12),
       decoration: const pw.BoxDecoration(
         color: _bgGrey,
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(10)),
+        borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
         children: [
-          _summaryCard(
-              _total, formatMontant(total), PdfColors.black, font, bold),
+          _clientStatCard(Tr.s('client_count'), null, '$txCount',
+              PdfColors.black, font, bold),
           _vLine(),
-          _summaryCard(
-              _paid, formatMontant(paye), PdfColors.green700, font, bold),
+          _clientStatCard(_ongoing, totalCredit, null,
+              PdfColors.green700, font, bold),
           _vLine(),
-          _summaryCard(
-              _remaining, formatMontant(restant), PdfColors.red700, font, bold),
+          _clientStatCard(_paid, totalDebit, null,
+              PdfColors.blue700, font, bold),
           _vLine(),
-          _summaryCard(
-              _openCredit, '$nbOuverts', PdfColors.orange700, font, bold),
+          _clientStatCard(_balance, solde, null,
+              solde > 0 ? PdfColors.red700 : PdfColors.green700, font, bold),
         ],
       ),
     );
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.only(bottom: 0),
+      decoration: const pw.BoxDecoration(
+        border: pw.Border(bottom: pw.BorderSide(color: _green, width: 2)),
+      ),
+      child: pw.Column(children: [
+        nameRow,
+        statsBar,
+        pw.SizedBox(height: 12),
+      ]),
+    );
   }
 
-  pw.Widget _summaryCard(String label, String value, PdfColor color,
-          pw.Font font, pw.Font bold) =>
-      pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
-        pw.Directionality(
-          textDirection: pw.TextDirection.ltr,
-          child: pw.Text(
-            value,
-            style: pw.TextStyle(font: bold, fontSize: 11, color: color),
-            textAlign: pw.TextAlign.center,
+  // ── كارد الإحصاء (عميل واحد) ✅ _currency بدل 'درهم' ─────────────────────────
+  pw.Widget _clientStatCard(String label, double? amount, String? countStr,
+      PdfColor color, pw.Font font, pw.Font bold) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.center,
+      children: [
+        if (amount != null) ...[
+          pw.Directionality(
+            textDirection: pw.TextDirection.ltr,
+            child: pw.Text(
+              amount.toStringAsFixed(2).replaceAll('.', ','),
+              style: pw.TextStyle(font: bold, fontSize: 11, color: color),
+              textAlign: pw.TextAlign.center,
+            ),
           ),
-        ),
+          // ✅ FIX 1: _currency بدل 'درهم' + ltr
+          pw.Directionality(
+            textDirection: pw.TextDirection.ltr,
+            child: pw.Text(_currency,
+                style: pw.TextStyle(font: font, fontSize: 8, color: color),
+                textAlign: pw.TextAlign.center),
+          ),
+        ] else
+          pw.Text(countStr ?? '',
+              style: pw.TextStyle(font: bold, fontSize: 13, color: color),
+              textAlign: pw.TextAlign.center),
         pw.SizedBox(height: 3),
         pw.Text(label,
             style: pw.TextStyle(font: font, fontSize: 9, color: _grey),
             textAlign: pw.TextAlign.center),
-      ]);
-
-  pw.Widget _vLine() =>
-      pw.Container(width: 0.5, height: 36, color: PdfColors.grey300);
-
-  // ── Arabic text helper ────────────────────────────────────────────────────────
-  pw.Widget _txt(String text, pw.TextStyle style, {pw.TextAlign? align}) {
-    final isArabic = RegExp(r'[؀-ۿ]').hasMatch(text);
-    return pw.Directionality(
-      textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
-      child: pw.Text(text, style: style, textAlign: align ?? pw.TextAlign.start),
+      ],
     );
   }
 
-  // ── SECTION TITLE ────────────────────────────────────────────────────────────
-  pw.Widget _sectionTitle(String title, pw.Font font, pw.Font bold) =>
-      pw.Container(
-        width: double.infinity,
-        padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: const pw.BoxDecoration(
-          color: _green,
-          borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
-        ),
-        child: pw.Text(title,
-            style: pw.TextStyle(
-                font: bold, fontSize: 13, color: PdfColors.white),
-            textAlign: pw.TextAlign.right),
-      );
+  // ── جدول المعاملات ────────────────────────────────────────────────────────────
+  pw.Widget _txTable(List<Map<String, dynamic>> txList, double totalCredit,
+      double totalDebit, pw.Font font, pw.Font bold) {
 
-  // ── CREDIT BLOCK ─────────────────────────────────────────────────────────────
-  pw.Widget _creditBlock(Credit credit, List<Paiement> paiements, pw.Font font,
-      pw.Font bold, pw.TextDirection textDir) {
-    final isSolde = credit.estSolde;
-    final statusColor = isSolde ? PdfColors.green700 : PdfColors.red700;
-    final statusText = isSolde ? '$_settled ✓' : '$_ongoing ●';
-    final pct = (credit.pourcentagePaye * 100).toStringAsFixed(0);
-
-    return pw.Container(
-      margin: const pw.EdgeInsets.only(bottom: 14),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-      ),
-      child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Container(
-              padding:
-                  const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: pw.BoxDecoration(
-                color: isSolde
-                    ? const PdfColor.fromInt(0xFFE8F5E9)
-                    : const PdfColor.fromInt(0xFFFFEBEE),
-                borderRadius: const pw.BorderRadius.only(
-                  topLeft: pw.Radius.circular(8),
-                  topRight: pw.Radius.circular(8),
-                ),
-              ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Row(children: [
-                    pw.Text(statusText,
-                        style: pw.TextStyle(
-                            font: bold, fontSize: 11, color: statusColor)),
-                    pw.SizedBox(width: 12),
-                    pw.Text(formatDate(credit.dateCredit),
-                        style: pw.TextStyle(
-                            font: font, fontSize: 10, color: _grey)),
-                  ]),
-                  pw.Text(formatMontant(credit.montantTotal),
-                      style: pw.TextStyle(
-                          font: bold, fontSize: 15, color: PdfColors.black)),
-                ],
-              ),
-            ),
-            pw.Padding(
-              padding: const pw.EdgeInsets.fromLTRB(14, 10, 14, 10),
-              child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  children: [
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text(formatMontant(credit.montantRestant),
-                                  style: pw.TextStyle(
-                                      font: bold,
-                                      fontSize: 14,
-                                      color: PdfColors.red700)),
-                              pw.Text(_remaining,
-                                  style: pw.TextStyle(
-                                      font: font, fontSize: 9, color: _grey)),
-                            ]),
-                        pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.end,
-                            children: [
-                              pw.Text(
-                                  formatMontant(credit.montantTotal -
-                                      credit.montantRestant),
-                                  style: pw.TextStyle(
-                                      font: bold,
-                                      fontSize: 14,
-                                      color: PdfColors.green700)),
-                              pw.Text(_paid,
-                                  style: pw.TextStyle(
-                                      font: font, fontSize: 9, color: _grey)),
-                            ]),
-                      ],
-                    ),
-                    pw.SizedBox(height: 8),
-                    pw.Stack(children: [
-                      pw.Container(
-                        width: double.infinity,
-                        height: 6,
-                        decoration: const pw.BoxDecoration(
-                          color: PdfColor.fromInt(0xFFFFEBEE),
-                          borderRadius:
-                              pw.BorderRadius.all(pw.Radius.circular(3)),
-                        ),
-                      ),
-                      pw.Container(
-                        width:
-                            (credit.pourcentagePaye.clamp(0.0, 1.0)) * 500,
-                        height: 6,
-                        decoration: const pw.BoxDecoration(
-                          color: _green,
-                          borderRadius:
-                              pw.BorderRadius.all(pw.Radius.circular(3)),
-                        ),
-                      ),
-                    ]),
-                    pw.SizedBox(height: 4),
-                    pw.Text('$pct% $_paid',
-                        style:
-                            pw.TextStyle(font: font, fontSize: 9, color: _green),
-                        textAlign: pw.TextAlign.right),
-                    if (credit.description != null &&
-                        credit.description!.isNotEmpty) ...[
-                      pw.SizedBox(height: 6),
-                      pw.Container(
-                        width: double.infinity,
-                        padding: const pw.EdgeInsets.all(8),
-                        decoration: const pw.BoxDecoration(
-                          color: _bgGrey,
-                          borderRadius:
-                              pw.BorderRadius.all(pw.Radius.circular(6)),
-                        ),
-                        child: pw.Directionality(
-                          textDirection:
-                              RegExp(r'[\u0600-\u06FF]').hasMatch(credit.description!)
-                                  ? pw.TextDirection.rtl
-                                  : pw.TextDirection.ltr,
-                          child: pw.Text(credit.description!,
-                              style: pw.TextStyle(
-                                  font: font, fontSize: 10, color: _grey),
-                              textAlign: pw.TextAlign.right),
-                        ),
-                      ),
-                    ],
-                    if (paiements.isNotEmpty) ...[
-                      pw.SizedBox(height: 10),
-                      pw.Text('$_payments (${paiements.length}):',
-                          style:
-                              pw.TextStyle(font: bold, fontSize: 11, color: _grey),
-                          textAlign: pw.TextAlign.right),
-                      pw.SizedBox(height: 6),
-                      ...paiements.map((p) => _paymentRow(p, font, bold)),
-                    ],
-                  ]),
-            ),
-          ]),
-    );
-  }
-
-  // ── PAYMENT ROW ──────────────────────────────────────────────────────────────
-  pw.Widget _paymentRow(Paiement p, pw.Font font, pw.Font bold) {
-    return pw.Container(
-      margin: const pw.EdgeInsets.only(bottom: 4),
-      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: const pw.BoxDecoration(
-        color: PdfColor.fromInt(0xFFF1F8E9),
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(formatMontant(p.montant),
+    pw.Widget cell(String text,
+            {pw.Font? f, PdfColor? color, double size = 9,
+            pw.TextAlign align = pw.TextAlign.center}) =>
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: pw.Text(text,
               style: pw.TextStyle(
-                  font: bold, fontSize: 12, color: PdfColors.green800)),
-          pw.Expanded(
-            child: pw.Text(p.note ?? '',
-                style: pw.TextStyle(font: font, fontSize: 9, color: _grey),
+                  font: f ?? font, fontSize: size, color: color),
+              textAlign: align),
+        );
+
+    // ✅ FIX 2: amountCell كتستعمل _currency بدل 'درهم'
+    pw.Widget amountCell(double amount,
+        {PdfColor? color, double size = 9, bool showZero = false}) {
+      if (amount == 0 && !showZero) {
+        return pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: pw.Text('-',
+              style: pw.TextStyle(font: font, fontSize: size, color: _grey),
+              textAlign: pw.TextAlign.center),
+        );
+      }
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            pw.Directionality(
+              textDirection: pw.TextDirection.ltr,
+              child: pw.Text(
+                amount.toStringAsFixed(2).replaceAll('.', ','),
+                style: pw.TextStyle(font: bold, fontSize: size, color: color),
                 textAlign: pw.TextAlign.center,
-                maxLines: 1,
-                textDirection: pw.TextDirection.rtl),
+              ),
+            ),
+            // ✅ FIX 2
+            pw.Directionality(
+              textDirection: pw.TextDirection.ltr,
+              child: pw.Text(_currency,
+                  style: pw.TextStyle(
+                      font: font,
+                      fontSize: size - 1,
+                      color: color ?? _grey),
+                  textAlign: pw.TextAlign.center),
+            ),
+          ],
+        ),
+      );
+    }
+
+    pw.Widget headerCell(String text) => pw.Container(
+          color: _green,
+          child: pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            child: _txt(text,
+                pw.TextStyle(font: bold, fontSize: 10, color: PdfColors.white),
+                align: pw.TextAlign.center),
           ),
-          pw.Text(formatDate(p.datePaiement),
-              style: pw.TextStyle(font: font, fontSize: 10, color: _grey)),
+        );
+
+    final headerRow = pw.TableRow(children: [
+      headerCell(_balance),
+      headerCell(_paid),
+      headerCell(_ongoing),
+      headerCell(Tr.currentLang == 'ar'
+          ? 'ملاحظة'
+          : (Tr.currentLang == 'fr' ? 'Note' : 'Note')),
+      headerCell(Tr.currentLang == 'ar'
+          ? 'التاريخ'
+          : (Tr.currentLang == 'fr' ? 'Date' : 'Date')),
+      headerCell('#'),
+    ]);
+
+    final dataRows = <pw.TableRow>[];
+    for (var i = 0; i < txList.length; i++) {
+      final tx      = txList[i];
+      final balance = tx['balance'] as double;
+      final credit  = tx['credit']  as double;
+      final debit   = tx['debit']   as double;
+      final note    = tx['note']    as String;
+      final date    = tx['date']    as DateTime;
+
+      dataRows.add(pw.TableRow(
+        decoration: i.isOdd
+            ? const pw.BoxDecoration(color: _bgGrey)
+            : const pw.BoxDecoration(),
+        children: [
+          amountCell(balance,
+              color: balance > 0 ? PdfColors.red700 : PdfColors.green700,
+              showZero: true),
+          amountCell(debit,  color: PdfColors.blue700),
+          amountCell(credit, color: PdfColors.green700),
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: _txt(note,
+                pw.TextStyle(font: font, fontSize: 8, color: _grey),
+                align: pw.TextAlign.center),
+          ),
+          cell(formatDate(date), size: 8),
+          cell('${i + 1}'),
         ],
-      ),
+      ));
+    }
+
+    final totalRow = pw.TableRow(
+      decoration:
+          const pw.BoxDecoration(color: PdfColor.fromInt(0xFFE8F5E9)),
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: _txt(
+              Tr.currentLang == 'ar'
+                  ? 'إجمالي الدفع'
+                  : (Tr.currentLang == 'fr' ? 'Total' : 'Total'),
+              pw.TextStyle(font: bold, fontSize: 9),
+              align: pw.TextAlign.center),
+        ),
+        amountCell(totalDebit,  color: PdfColors.blue700,  size: 10),
+        amountCell(totalCredit, color: PdfColors.green700, size: 10),
+        cell(''),
+        cell(''),
+        cell(''),
+      ],
+    );
+
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      defaultVerticalAlignment: pw.TableCellVerticalAlignment.middle,
+      columnWidths: const {
+        0: pw.FlexColumnWidth(1.4),
+        1: pw.FlexColumnWidth(1.3),
+        2: pw.FlexColumnWidth(1.3),
+        3: pw.FlexColumnWidth(2.0),
+        4: pw.FlexColumnWidth(1.4),
+        5: pw.FlexColumnWidth(0.6),
+      },
+      children: [headerRow, ...dataRows, totalRow],
     );
   }
 
-  // ── QUICK SUMMARY ────────────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════════
+  //  QUICK SUMMARY (A5)
+  // ════════════════════════════════════════════════════════════════════════════
   Future<void> printClientSummary(Client client, double solde) async {
-    final font = await _loadFont('assets/fonts/Cairo-Regular.ttf');
+    final font     = await _loadFont('assets/fonts/Cairo-Regular.ttf');
     final fontBold = await _loadFont('assets/fonts/Cairo-Bold.ttf');
 
     final pdf = pw.Document();
-    final textDir = Tr.isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr;
-
     final isArSummary = Tr.currentLang == 'ar';
+
     pdf.addPage(pw.Page(
       pageFormat: PdfPageFormat.a5,
-      textDirection: isArSummary ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+      textDirection:
+          isArSummary ? pw.TextDirection.rtl : pw.TextDirection.ltr,
       margin: const pw.EdgeInsets.all(32),
       build: (ctx) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
           pw.Text(_appName,
-              style:
-                  pw.TextStyle(font: fontBold, fontSize: 28, color: _green)),
+              style: pw.TextStyle(
+                  font: fontBold, fontSize: 28, color: _green)),
           pw.SizedBox(height: 4),
           pw.Text(_summary,
               style: pw.TextStyle(font: font, fontSize: 13, color: _grey)),
@@ -446,7 +454,8 @@ class PdfService {
           if (client.telephone != null) ...[
             pw.SizedBox(height: 8),
             pw.Text(client.telephone!,
-                style: pw.TextStyle(font: font, fontSize: 14, color: _grey),
+                style: pw.TextStyle(
+                    font: font, fontSize: 14, color: _grey),
                 textAlign: pw.TextAlign.center),
           ],
           pw.SizedBox(height: 24),
@@ -462,8 +471,8 @@ class PdfService {
             ),
             child: pw.Column(children: [
               pw.Text(_balance,
-                  style:
-                      pw.TextStyle(font: font, fontSize: 12, color: _grey)),
+                  style: pw.TextStyle(
+                      font: font, fontSize: 12, color: _grey)),
               pw.SizedBox(height: 6),
               pw.Text(formatMontant(solde),
                   style: pw.TextStyle(
@@ -498,10 +507,10 @@ class PdfService {
     List<Map<String, dynamic>> rows,
     String type,
   ) async {
-    final font = await _loadFont('assets/fonts/Cairo-Regular.ttf');
+    final font     = await _loadFont('assets/fonts/Cairo-Regular.ttf');
     final fontBold = await _loadFont('assets/fonts/Cairo-Bold.ttf');
 
-    final isAr = Tr.currentLang == 'ar';
+    final isAr    = Tr.currentLang == 'ar';
     final pageDir = isAr ? pw.TextDirection.rtl : pw.TextDirection.ltr;
 
     final totalCredit =
@@ -567,10 +576,9 @@ class PdfService {
     );
   }
 
-  // ── شريط التوتال فالأعلى ─────────────────────────────────────────────────────
+  // ── شريط التوتال ديال جميع العملاء ✅ FIX 3 ──────────────────────────────────
   pw.Widget _allClientsSummaryRow(int count, double totalCredit,
       double totalPaye, double totalSolde, pw.Font font, pw.Font bold) {
-    // كارد بدون formatMontant المخلوط — عدد + درهم منفصلين
     pw.Widget summCard(
             String label, double? amount, String? countStr, PdfColor color) =>
         pw.Column(
@@ -581,18 +589,20 @@ class PdfService {
                 textDirection: pw.TextDirection.ltr,
                 child: pw.Text(
                   amount.toStringAsFixed(2).replaceAll('.', ','),
-                  style:
-                      pw.TextStyle(font: bold, fontSize: 11, color: color),
+                  style: pw.TextStyle(font: bold, fontSize: 11, color: color),
                   textAlign: pw.TextAlign.center,
                 ),
               ),
-              pw.Text('درهم',
-                  style: pw.TextStyle(font: font, fontSize: 8, color: color),
-                  textAlign: pw.TextAlign.center),
+              // ✅ FIX 3
+              pw.Directionality(
+                textDirection: pw.TextDirection.ltr,
+                child: pw.Text(_currency,
+                    style: pw.TextStyle(font: font, fontSize: 8, color: color),
+                    textAlign: pw.TextAlign.center),
+              ),
             ] else
               pw.Text(countStr ?? '',
-                  style:
-                      pw.TextStyle(font: bold, fontSize: 13, color: color),
+                  style: pw.TextStyle(font: bold, fontSize: 13, color: color),
                   textAlign: pw.TextAlign.center),
             pw.SizedBox(height: 3),
             pw.Text(label,
@@ -623,7 +633,7 @@ class PdfService {
     );
   }
 
-  // ── الجدول الكبير — معكوس، يبدا من الليمن ────────────────────────────────────
+  // ── جدول جميع العملاء ✅ FIX 4 ───────────────────────────────────────────────
   pw.Widget _allClientsTable(
       List<Map<String, dynamic>> rows,
       double totalCredit,
@@ -631,22 +641,20 @@ class PdfService {
       double totalSolde,
       pw.Font font,
       pw.Font bold) {
-    // سيلة النص العادي
     pw.Widget cell(String text,
             {pw.Font? f, PdfColor? color, double size = 9}) =>
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: pw.Text(text,
-              style:
-                  pw.TextStyle(font: f ?? font, fontSize: size, color: color),
+              style: pw.TextStyle(
+                  font: f ?? font, fontSize: size, color: color),
               textAlign: pw.TextAlign.center),
         );
 
-    // سيلة المبالغ — عدد فسطر + درهم فسطر ثاني
+    // ✅ FIX 4: amountCell كتستعمل _currency بدل 'درهم'
     pw.Widget amountCell(double amount,
-            {PdfColor? color, double size = 9}) {
-      final numStr =
-          amount.toStringAsFixed(2).replaceAll('.', ',');
+        {PdfColor? color, double size = 9}) {
+      final numStr = amount.toStringAsFixed(2).replaceAll('.', ',');
       return pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: pw.Column(
@@ -660,44 +668,45 @@ class PdfService {
                       font: bold, fontSize: size, color: color),
                   textAlign: pw.TextAlign.center),
             ),
-            pw.Text('درهم',
-                style: pw.TextStyle(
-                    font: font,
-                    fontSize: size - 1,
-                    color: color ?? _grey),
-                textAlign: pw.TextAlign.center),
+            // ✅ FIX 4
+            pw.Directionality(
+              textDirection: pw.TextDirection.ltr,
+              child: pw.Text(_currency,
+                  style: pw.TextStyle(
+                      font: font,
+                      fontSize: size - 1,
+                      color: color ?? _grey),
+                  textAlign: pw.TextAlign.center),
+            ),
           ],
         ),
       );
     }
 
-    // سيلة الهيدر — _txt كتصلح الحروف العربية
     pw.Widget headerCell(String text) => pw.Container(
           color: _green,
           child: pw.Padding(
             padding:
                 const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-            child: _txt(
-                text,
+            child: _txt(text,
                 pw.TextStyle(
                     font: bold, fontSize: 10, color: PdfColors.white),
                 align: pw.TextAlign.center),
           ),
         );
 
-    // الترتيب معكوس يدوياً: # يبان فاليمن، الرصيد فاليسر
     final headerRow = pw.TableRow(children: [
-      headerCell(_balance),       // col 0 → يسار
-      headerCell(_paid),          // col 1
-      headerCell(_ongoing),       // col 2
-      headerCell(Tr.s('phone')),  // col 3
-      headerCell(Tr.s('client')), // col 4
-      headerCell('#'),            // col 5 → يمين
+      headerCell(_balance),
+      headerCell(_paid),
+      headerCell(_ongoing),
+      headerCell(Tr.s('phone')),
+      headerCell(Tr.s('client')),
+      headerCell('#'),
     ]);
 
     final dataRows = <pw.TableRow>[];
     for (var i = 0; i < rows.length; i++) {
-      final r = rows[i];
+      final r     = rows[i];
       final solde = r['solde'] as double;
       dataRows.add(pw.TableRow(
         decoration: i.isOdd
@@ -706,7 +715,7 @@ class PdfService {
         children: [
           amountCell(solde,
               color: solde > 0 ? PdfColors.red700 : PdfColors.green700),
-          amountCell(r['totalPaye'] as double, color: PdfColors.blue700),
+          amountCell(r['totalPaye']   as double, color: PdfColors.blue700),
           amountCell(r['totalCredit'] as double, color: PdfColors.green700),
           cell(r['telephone'] as String? ?? '-'),
           cell(r['nom'] as String, f: bold),
@@ -715,7 +724,6 @@ class PdfService {
       ));
     }
 
-    // صف التوتال
     final totalRow = pw.TableRow(
       decoration:
           const pw.BoxDecoration(color: PdfColor.fromInt(0xFFE8F5E9)),
@@ -723,7 +731,7 @@ class PdfService {
         amountCell(totalSolde,
             color: totalSolde > 0 ? PdfColors.red700 : PdfColors.green700,
             size: 10),
-        amountCell(totalPaye, color: PdfColors.blue700, size: 10),
+        amountCell(totalPaye,   color: PdfColors.blue700,  size: 10),
         amountCell(totalCredit, color: PdfColors.green700, size: 10),
         cell(''),
         cell(_total, f: bold),
@@ -735,12 +743,12 @@ class PdfService {
       border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
       defaultVerticalAlignment: pw.TableCellVerticalAlignment.middle,
       columnWidths: const {
-        0: pw.FlexColumnWidth(1.3), // الرصيد
-        1: pw.FlexColumnWidth(1.3), // محفوع
-        2: pw.FlexColumnWidth(1.3), // أخذت
-        3: pw.FlexColumnWidth(1.8), // الهاتف
-        4: pw.FlexColumnWidth(2.4), // الاسم
-        5: pw.FlexColumnWidth(0.6), // #
+        0: pw.FlexColumnWidth(1.3),
+        1: pw.FlexColumnWidth(1.3),
+        2: pw.FlexColumnWidth(1.3),
+        3: pw.FlexColumnWidth(1.8),
+        4: pw.FlexColumnWidth(2.4),
+        5: pw.FlexColumnWidth(0.6),
       },
       children: [headerRow, ...dataRows, totalRow],
     );

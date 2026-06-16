@@ -567,7 +567,11 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     try {
       await DatabaseHelper.instance.deleteAllData();
       await NotificationService.instance.cancelAll();
-      _snack(Tr.s('data_deleted'), isError: false);
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
     } catch (e) {
       _snack('${Tr.s('error_prefix')} $e', isError: true);
     }
@@ -678,9 +682,9 @@ class _SetPinSheetState extends State<_SetPinSheet> {
   bool _isConfirm = false;
   bool _error = false;
 
-String get _currentInput => _isConfirm ? _confirmPin : _pin;
+  String get _currentInput => _isConfirm ? _confirmPin : _pin;
 
-String get _title => _isConfirm ? Tr.s('confirm_pin') : Tr.s('choose_pin');
+  String get _title => _isConfirm ? Tr.s('confirm_pin') : Tr.s('choose_pin');
   void _onDigit(String digit) {
     if (_currentInput.length >= 4) return;
     setState(() {

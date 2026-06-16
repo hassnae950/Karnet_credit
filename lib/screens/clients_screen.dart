@@ -325,13 +325,13 @@ class ClientsScreenState extends State<ClientsScreen>
         child: Row(
           children: [
             _statChip(
-                Tr.s('took'), _totalCredit, _kGreen, _kGreen.withOpacity(0.12)),
-            const SizedBox(width: 8),
-            _statChip(Tr.s('remaining'), _totalRestant, _kRed,
-                _kRed.withOpacity(0.12)),
-            const SizedBox(width: 8),
+                Tr.s('took'), _totalPaye, _kGreen, _kGreen.withOpacity(0.12)),
             _statChip(
-                Tr.s('gave'), _totalPaye, _kBlue, _kBlue.withOpacity(0.12)),
+                Tr.s('gave'), _totalCredit, _kRed, _kRed.withOpacity(0.12)),
+            const SizedBox(width: 8),
+            _statChip(Tr.s('remaining'), _totalRestant, _kBlue,
+                _kBlue.withOpacity(0.12)),
+            const SizedBox(width: 8),
           ],
         ),
       );
