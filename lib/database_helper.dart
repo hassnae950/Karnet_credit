@@ -34,7 +34,7 @@ class DatabaseHelper {
     await db.execute('DROP TABLE IF EXISTS credits');
     await db.execute('DROP TABLE IF EXISTS clients');
     await db.execute('DROP TABLE IF EXISTS categories');
-    
+
     // 1. جدول التصنيفات
     await db.execute('''
       CREATE TABLE categories(
@@ -43,7 +43,7 @@ class DatabaseHelper {
         type TEXT NOT NULL
       )
     ''');
-    
+
     // 2. جدول العملاء/الموردين
     await db.execute('''
       CREATE TABLE clients(
@@ -60,7 +60,7 @@ class DatabaseHelper {
         FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE SET NULL
       )
     ''');
-    
+
     // 3. جدول الكريديات (مع عمود الصورة)
     await db.execute('''
       CREATE TABLE credits(
@@ -74,7 +74,7 @@ class DatabaseHelper {
         FOREIGN KEY (clientId) REFERENCES clients (id) ON DELETE CASCADE
       )
     ''');
-    
+
     // 4. جدول الدفعات (مع عمود الصورة)
     await db.execute('''
       CREATE TABLE paiements(
@@ -87,7 +87,7 @@ class DatabaseHelper {
         FOREIGN KEY (creditId) REFERENCES credits (id) ON DELETE CASCADE
       )
     ''');
-    
+
     // 5. جدول الشيكات
     await db.execute('''
       CREATE TABLE cheques(
@@ -108,18 +108,23 @@ class DatabaseHelper {
   // دالة تحديث قاعدة البيانات
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('Upgrading database from version $oldVersion to $newVersion');
-    
+
     if (oldVersion < 2) {
       try {
-        await db.execute('ALTER TABLE clients ADD COLUMN type TEXT DEFAULT "CLIENT"'); await db.execute('ALTER TABLE clients ADD COLUMN company TEXT'); await db.execute('ALTER TABLE clients ADD COLUMN notes TEXT');  await db.execute('ALTER TABLE clients ADD COLUMN solde REAL DEFAULT 0');
+        await db.execute(
+            'ALTER TABLE clients ADD COLUMN type TEXT DEFAULT "CLIENT"');
+        await db.execute('ALTER TABLE clients ADD COLUMN company TEXT');
+        await db.execute('ALTER TABLE clients ADD COLUMN notes TEXT');
+        await db.execute('ALTER TABLE clients ADD COLUMN solde REAL DEFAULT 0');
       } catch (e) {
         print('Error adding columns to clients: $e');
       }
     }
-    
+
     if (oldVersion < 3) {
       try {
-        await db.execute('''   CREATE TABLE IF NOT EXISTS categories(  id INTEGER PRIMARY KEY AUTOINCREMENT,    name TEXT NOT NULL,type TEXT NOT NULL
+        await db.execute(
+            '''   CREATE TABLE IF NOT EXISTS categories(  id INTEGER PRIMARY KEY AUTOINCREMENT,    name TEXT NOT NULL,type TEXT NOT NULL
           )
         ''');
         await db.execute('ALTER TABLE clients ADD COLUMN categoryId INTEGER');
@@ -127,10 +132,11 @@ class DatabaseHelper {
         print('Error creating categories table: $e');
       }
     }
-    
+
     if (oldVersion < 4) {
       try {
-        await db.execute('ALTER TABLE credits ADD COLUMN imagePath TEXT');  await db.execute('ALTER TABLE paiements ADD COLUMN imagePath TEXT');
+        await db.execute('ALTER TABLE credits ADD COLUMN imagePath TEXT');
+        await db.execute('ALTER TABLE paiements ADD COLUMN imagePath TEXT');
       } catch (e) {
         print('Error adding imagePath columns: $e');
       }
@@ -407,7 +413,6 @@ class DatabaseHelper {
 
   // ==================== FIFO Payment ====================
 
-  /// Distributes a payment across open credits, oldest first (FIFO)
   Future<void> createPaiementFIFO(
     int clientId,
     double montant, {
@@ -419,16 +424,37 @@ class DatabaseHelper {
       'credits',
       where: 'clientId = ? AND montantRestant > 0',
       whereArgs: [clientId],
-      orderBy: 'dateCredit ASC', // oldest first
+      orderBy: 'dateCredit ASC',
     );
     final openCredits = rows.map((m) => Credit.fromMap(m)).toList();
-    if (openCredits.isEmpty) return;
+    final now = DateTime.now();
+
+    if (openCredits.isEmpty) {
+      // ── مكاين كريدي مفتوح — سجل الدفعة على أول كريدي موجود ──────────
+      final allRows = await db.query(
+        'credits',
+        where: 'clientId = ?',
+        whereArgs: [clientId],
+        orderBy: 'dateCredit DESC',
+        limit: 1,
+      );
+      if (allRows.isEmpty) return;
+      final credit = Credit.fromMap(allRows.first);
+      await createPaiement(Paiement(
+        creditId: credit.id!,
+        montant: montant,
+        datePaiement: now,
+        note: note,
+        imagePath: imagePath,
+      ));
+      return;
+    }
 
     double remaining = montant;
-    final now = DateTime.now();
 
     for (final credit in openCredits) {
       if (remaining <= 0) break;
+      // ── سجل المبلغ الكامل المتبقي على هذا الكريدي ──────────────────
       final toPay = remaining >= credit.montantRestant
           ? credit.montantRestant
           : remaining;
@@ -441,14 +467,28 @@ class DatabaseHelper {
       ));
       remaining -= toPay;
     }
+
+    // ── إذا بقى مبلغ زايد بعد ما خلصات كل الكريديات ──────────────────
+    // سجله على آخر كريدي (يخلي الرصيد يروح للسالب = العميل دفع زيادة)
+    if (remaining > 0.01) {
+      final lastCredit = openCredits.last;
+      await createPaiement(Paiement(
+        creditId: lastCredit.id!,
+        montant: remaining,
+        datePaiement: now,
+        note: note,
+        imagePath: imagePath,
+      ));
+    }
   }
-Future<Map<String, dynamic>> exportAllData() async {
+
+  Future<Map<String, dynamic>> exportAllData() async {
     final db = await database;
     return {
-      'clients':   await db.query('clients'),
-      'credits':   await db.query('credits'),
+      'clients': await db.query('clients'),
+      'credits': await db.query('credits'),
       'paiements': await db.query('paiements'),
-      'cheques':   await db.query('cheques'),
+      'cheques': await db.query('cheques'),
     };
   }
 
@@ -458,7 +498,9 @@ Future<Map<String, dynamic>> exportAllData() async {
       // امسح كل البيانات القديمة + reset AUTOINCREMENT
       for (final t in ['cheques', 'paiements', 'credits', 'clients']) {
         await txn.delete(t);
-        try { await txn.execute("DELETE FROM sqlite_sequence WHERE name='\$t'"); } catch (_) {}
+        try {
+          await txn.execute("DELETE FROM sqlite_sequence WHERE name='\$t'");
+        } catch (_) {}
       }
 
       // استعمل INSERT OR REPLACE باش نتفادى conflict على IDs
@@ -467,8 +509,18 @@ Future<Map<String, dynamic>> exportAllData() async {
         final m = Map<String, dynamic>.from(r as Map);
         await txn.rawInsert(
           'INSERT OR REPLACE INTO clients(id,nom,telephone,adresse,dateCreation,solde,type,categoryId,company,notes) VALUES (?,?,?,?,?,?,?,?,?,?)',
-          [m['id'], m['nom'], m['telephone'], m['adresse'], m['dateCreation'],
-           m['solde'] ?? 0, m['type'] ?? 'CLIENT', m['categoryId'], m['company'], m['notes']],
+          [
+            m['id'],
+            m['nom'],
+            m['telephone'],
+            m['adresse'],
+            m['dateCreation'],
+            m['solde'] ?? 0,
+            m['type'] ?? 'CLIENT',
+            m['categoryId'],
+            m['company'],
+            m['notes']
+          ],
         );
       }
 
@@ -477,8 +529,15 @@ Future<Map<String, dynamic>> exportAllData() async {
         final m = Map<String, dynamic>.from(r as Map);
         await txn.rawInsert(
           'INSERT OR REPLACE INTO credits(id,clientId,montantTotal,montantRestant,dateCredit,description,imagePath) VALUES (?,?,?,?,?,?,?)',
-          [m['id'], m['clientId'], m['montantTotal'], m['montantRestant'],
-           m['dateCredit'], m['description'], m['imagePath']],
+          [
+            m['id'],
+            m['clientId'],
+            m['montantTotal'],
+            m['montantRestant'],
+            m['dateCredit'],
+            m['description'],
+            m['imagePath']
+          ],
         );
       }
 
@@ -487,7 +546,14 @@ Future<Map<String, dynamic>> exportAllData() async {
         final m = Map<String, dynamic>.from(r as Map);
         await txn.rawInsert(
           'INSERT OR REPLACE INTO paiements(id,creditId,montant,datePaiement,note,imagePath) VALUES (?,?,?,?,?,?)',
-          [m['id'], m['creditId'], m['montant'], m['datePaiement'], m['note'], m['imagePath']],
+          [
+            m['id'],
+            m['creditId'],
+            m['montant'],
+            m['datePaiement'],
+            m['note'],
+            m['imagePath']
+          ],
         );
       }
 
@@ -496,8 +562,17 @@ Future<Map<String, dynamic>> exportAllData() async {
         final m = Map<String, dynamic>.from(r as Map);
         await txn.rawInsert(
           'INSERT OR REPLACE INTO cheques(id,creditId,numero,montant,dateEcheance,banque,imagePath,statut,dateCreation) VALUES (?,?,?,?,?,?,?,?,?)',
-          [m['id'], m['creditId'], m['numero'], m['montant'], m['dateEcheance'],
-           m['banque'], m['imagePath'], m['statut'] ?? 'EN_ATTENTE', m['dateCreation']],
+          [
+            m['id'],
+            m['creditId'],
+            m['numero'],
+            m['montant'],
+            m['dateEcheance'],
+            m['banque'],
+            m['imagePath'],
+            m['statut'] ?? 'EN_ATTENTE',
+            m['dateCreation']
+          ],
         );
       }
     });
@@ -508,13 +583,16 @@ Future<Map<String, dynamic>> exportAllData() async {
     await db.transaction((txn) async {
       for (final t in ['cheques', 'paiements', 'credits', 'clients']) {
         await txn.delete(t);
-        try { await txn.execute("DELETE FROM sqlite_sequence WHERE name='\$t'"); } catch (_) {}
+        try {
+          await txn.execute("DELETE FROM sqlite_sequence WHERE name='\$t'");
+        } catch (_) {}
       }
     });
   }
   // ==================== Flat transactions list with running balance ====================
 
-  Future<List<Map<String, dynamic>>> getAllTransactionsClient(int clientId) async {
+  Future<List<Map<String, dynamic>>> getAllTransactionsClient(
+      int clientId) async {
     final db = await database;
 
     final creditRows = await db.query(
@@ -540,17 +618,17 @@ Future<Map<String, dynamic>> exportAllData() async {
         where: 'creditId = ?',
         whereArgs: [cr['id']],
       );
-for (final p in pRows) {
-  all.add({
-    'type': 'PAYMENT',
-    'id': p['id'],
-    'creditId': cr['id'],    // ← زيد هاد السطر فقط
-    'amount': (p['montant'] as num).toDouble(),
-    'date': p['datePaiement'] as String,
-    'description': p['note'],
-    'imagePath': p['imagePath'],
-  });
-}
+      for (final p in pRows) {
+        all.add({
+          'type': 'PAYMENT',
+          'id': p['id'],
+          'creditId': cr['id'], // ← زيد هاد السطر فقط
+          'amount': (p['montant'] as num).toDouble(),
+          'date': p['datePaiement'] as String,
+          'description': p['note'],
+          'imagePath': p['imagePath'],
+        });
+      }
     }
 
     // Sort chronologically
@@ -569,14 +647,14 @@ for (final p in pRows) {
 
     return all.reversed.toList(); // most recent first
   }
-  
+
   // ==================== Advanced Search & Filter Support ====================
-  
+
   /// Get the most recent activity date for a client
   /// Considers: credits, payments, and cheques
   Future<DateTime?> getLastActivityDate(int clientId) async {
     final db = await database;
-    
+
     // Get most recent credit date
     final creditResult = await db.rawQuery('''
       SELECT MAX(dateCredit) as maxDate
@@ -586,7 +664,7 @@ for (final p in pRows) {
     final creditDate = creditResult.first['maxDate'] != null
         ? DateTime.tryParse(creditResult.first['maxDate'] as String)
         : null;
-    
+
     // Get most recent payment date
     final paiementResult = await db.rawQuery('''
       SELECT MAX(p.datePaiement) as maxDate
@@ -597,7 +675,7 @@ for (final p in pRows) {
     final paiementDate = paiementResult.first['maxDate'] != null
         ? DateTime.tryParse(paiementResult.first['maxDate'] as String)
         : null;
-    
+
     // Get most recent cheque date
     final chequeResult = await db.rawQuery('''
       SELECT MAX(ch.dateCreation) as maxDate
@@ -608,18 +686,18 @@ for (final p in pRows) {
     final chequeDate = chequeResult.first['maxDate'] != null
         ? DateTime.tryParse(chequeResult.first['maxDate'] as String)
         : null;
-    
+
     // Return the most recent of all dates
     final dates = [creditDate, paiementDate, chequeDate]
         .where((d) => d != null)
         .cast<DateTime>()
         .toList();
-    
+
     if (dates.isEmpty) return null;
     dates.sort((a, b) => b.compareTo(a)); // most recent first
     return dates.first;
   }
-  
+
   /// Get count of active cheques for a client
   Future<int> getClientChequeCount(int clientId) async {
     final db = await database;
@@ -630,10 +708,10 @@ for (final p in pRows) {
       WHERE c.clientId = ?
       AND ch.statut = 'EN_ATTENTE'
     ''', [clientId]);
-    
+
     return (result.first['count'] as int?) ?? 0;
- 
   }
+
   /// بيانات تقرير شامل لكل العملاء/الموردين (لكل واحد: أخذ، أعطى، الرصيد)
   Future<List<Map<String, dynamic>>> getClientsReportData(String type) async {
     final db = await database;
@@ -649,14 +727,16 @@ for (final p in pRows) {
       ORDER BY cl.nom ASC
     ''', [type]);
 
-    return result.map((row) => {
-      'id': row['id'],
-      'nom': row['nom'] as String,
-      'telephone': row['telephone'] as String?,
-      'company': row['company'] as String?,
-      'totalCredit': (row['totalCredit'] as num).toDouble(),
-      'totalPaye': (row['totalPaye'] as num).toDouble(),
-      'solde': (row['solde'] as num).toDouble(),
-    }).toList();
+    return result
+        .map((row) => {
+              'id': row['id'],
+              'nom': row['nom'] as String,
+              'telephone': row['telephone'] as String?,
+              'company': row['company'] as String?,
+              'totalCredit': (row['totalCredit'] as num).toDouble(),
+              'totalPaye': (row['totalPaye'] as num).toDouble(),
+              'solde': (row['solde'] as num).toDouble(),
+            })
+        .toList();
   }
 }
