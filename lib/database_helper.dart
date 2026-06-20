@@ -420,66 +420,87 @@ class DatabaseHelper {
     String? imagePath,
   }) async {
     final db = await database;
-    final rows = await db.query(
+    final now = DateTime.now();
+
+    // ── سجل paiement واحد بالمبلغ الكامل ──────────────────────────────
+    // نجيبو أول credit مفتوح باش نربطو بيه
+    final openRows = await db.query(
+      'credits',
+      where: 'clientId = ? AND montantRestant > 0',
+      whereArgs: [clientId],
+      orderBy: 'dateCredit ASC',
+      limit: 1,
+    );
+
+    // إذا مكاين credits مفتوحة، نجيبو آخر credit موجود
+    final allRows = openRows.isNotEmpty
+        ? openRows
+        : await db.query(
+            'credits',
+            where: 'clientId = ?',
+            whereArgs: [clientId],
+            orderBy: 'dateCredit DESC',
+            limit: 1,
+          );
+
+    if (allRows.isEmpty) return;
+
+    final firstCreditId = allRows.first['id'] as int;
+
+    // ── سجل paiement واحد بالمبلغ الكامل ──────────────────────────────
+    await db.insert('paiements', {
+      'creditId': firstCreditId,
+      'montant': montant,
+      'datePaiement': now.toIso8601String(),
+      'note': note,
+      'imagePath': imagePath,
+    });
+
+    // ── حدث montantRestant على الكريديات FIFO في الخلفية ───────────────
+    final credits = await db.query(
       'credits',
       where: 'clientId = ? AND montantRestant > 0',
       whereArgs: [clientId],
       orderBy: 'dateCredit ASC',
     );
-    final openCredits = rows.map((m) => Credit.fromMap(m)).toList();
-    final now = DateTime.now();
-
-    if (openCredits.isEmpty) {
-      // ── مكاين كريدي مفتوح — سجل الدفعة على أول كريدي موجود ──────────
-      final allRows = await db.query(
-        'credits',
-        where: 'clientId = ?',
-        whereArgs: [clientId],
-        orderBy: 'dateCredit DESC',
-        limit: 1,
-      );
-      if (allRows.isEmpty) return;
-      final credit = Credit.fromMap(allRows.first);
-      await createPaiement(Paiement(
-        creditId: credit.id!,
-        montant: montant,
-        datePaiement: now,
-        note: note,
-        imagePath: imagePath,
-      ));
-      return;
-    }
 
     double remaining = montant;
-
-    for (final credit in openCredits) {
+    for (final row in credits) {
       if (remaining <= 0) break;
-      // ── سجل المبلغ الكامل المتبقي على هذا الكريدي ──────────────────
-      final toPay = remaining >= credit.montantRestant
-          ? credit.montantRestant
-          : remaining;
-      await createPaiement(Paiement(
-        creditId: credit.id!,
-        montant: toPay,
-        datePaiement: now,
-        note: note,
-        imagePath: imagePath,
-      ));
+      final id = row['id'] as int;
+      final restant = (row['montantRestant'] as num).toDouble();
+      final toPay = remaining >= restant ? restant : remaining;
+      await db.update(
+        'credits',
+        {'montantRestant': restant - toPay},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
       remaining -= toPay;
     }
 
-    // ── إذا بقى مبلغ زايد بعد ما خلصات كل الكريديات ──────────────────
-    // سجله على آخر كريدي (يخلي الرصيد يروح للسالب = العميل دفع زيادة)
+    // ── إذا بقى مبلغ زايد — حط الرصيد سالب على أول credit ─────────────
     if (remaining > 0.01) {
-      final lastCredit = openCredits.last;
-      await createPaiement(Paiement(
-        creditId: lastCredit.id!,
-        montant: remaining,
-        datePaiement: now,
-        note: note,
-        imagePath: imagePath,
-      ));
+      final firstRow = await db.query(
+        'credits',
+        where: 'clientId = ?',
+        whereArgs: [clientId],
+        orderBy: 'dateCredit ASC',
+        limit: 1,
+      );
+      if (firstRow.isNotEmpty) {
+        final id = firstRow.first['id'] as int;
+        final restant = (firstRow.first['montantRestant'] as num).toDouble();
+        await db.update(
+          'credits',
+          {'montantRestant': restant - remaining},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
     }
+
+    await updateClientSolde(clientId);
   }
 
   Future<Map<String, dynamic>> exportAllData() async {

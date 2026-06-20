@@ -6,6 +6,8 @@ import '../utils/app_translations.dart';
 import '../services/image_encryption_service.dart';
 
 const _kPrimary = Color(0xFF1B8A6B);
+const _kRed = Color(0xFFD32F2F);
+const _kGreen = Color(0xFF388E3C);
 
 class AddChequeSheet extends StatefulWidget {
   final int clientId;
@@ -22,14 +24,17 @@ class AddChequeSheet extends StatefulWidget {
 }
 
 class _AddChequeSheetState extends State<AddChequeSheet> {
-  final _numeroCtrl  = TextEditingController();
+  final _numeroCtrl = TextEditingController();
   final _montantCtrl = TextEditingController();
-  final _banqueCtrl  = TextEditingController();
-  final _descCtrl    = TextEditingController();
-  final _dateCtrl    = TextEditingController();
-  String?   _imagePath;
-  bool      _saving = false;
+  final _banqueCtrl = TextEditingController();
+  final _descCtrl = TextEditingController();
+  final _dateCtrl = TextEditingController();
+  String? _imagePath;
+  bool _saving = false;
   DateTime? _selectedDate;
+
+  // ── نوع الشيك: CREDIT = أخذت / PAYMENT = أعطيت ──────────────────────────
+  String _chequeType = 'CREDIT'; // default: أخذت
 
   @override
   void dispose() {
@@ -70,13 +75,15 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark    = Theme.of(context).brightness == Brightness.dark;
-    final sheetBg   = isDark ? const Color(0xFF1E1E2E) : Colors.white;
-    final fillColor = isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F6FA);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF1E1E2E) : Colors.white;
+    final fillColor =
+        isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F6FA);
     final textColor = isDark ? Colors.white : Colors.black87;
 
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: BoxDecoration(
         color: sheetBg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -104,10 +111,89 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
                           color: textColor)),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
+
+              // ── نوع الشيك: أخذت / أعطيت ──────────────────────────────
+              Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _chequeType = 'CREDIT'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: _chequeType == 'CREDIT' ? _kGreen : fillColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _chequeType == 'CREDIT'
+                              ? _kGreen
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.arrow_downward,
+                              color: _chequeType == 'CREDIT'
+                                  ? Colors.white
+                                  : Colors.grey,
+                              size: 18),
+                          const SizedBox(width: 6),
+                          Text(Tr.s('took'),
+                              style: TextStyle(
+                                color: _chequeType == 'CREDIT'
+                                    ? Colors.white
+                                    : Colors.grey,
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _chequeType = 'PAYMENT'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: _chequeType == 'PAYMENT' ? _kRed : fillColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _chequeType == 'PAYMENT'
+                              ? _kRed
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.arrow_upward,
+                              color: _chequeType == 'PAYMENT'
+                                  ? Colors.white
+                                  : Colors.grey,
+                              size: 18),
+                          const SizedBox(width: 6),
+                          Text(Tr.s('gave'),
+                              style: TextStyle(
+                                color: _chequeType == 'PAYMENT'
+                                    ? Colors.white
+                                    : Colors.grey,
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 12),
 
               // ── Cheque number ────────────────────────────────────────────
-              _buildField(_numeroCtrl, Tr.s('cheque_number'), fillColor, textColor),
+              _buildField(
+                  _numeroCtrl, Tr.s('cheque_number'), fillColor, textColor),
               const SizedBox(height: 12),
 
               // ── Amount ───────────────────────────────────────────────────
@@ -126,7 +212,8 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
               const SizedBox(height: 12),
 
               // ── Note ─────────────────────────────────────────────────────
-              _buildField(_descCtrl, Tr.s('note_optional'), fillColor, textColor),
+              _buildField(
+                  _descCtrl, Tr.s('note_optional'), fillColor, textColor),
               const SizedBox(height: 12),
 
               // ── Due date ─────────────────────────────────────────────────
@@ -138,8 +225,10 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
                 style: TextStyle(fontFamily: 'Cairo', color: textColor),
                 decoration: InputDecoration(
                   hintText: Tr.s('due_date'),
-                  hintStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey.shade500),
-                  suffixIcon: const Icon(Icons.calendar_today, color: _kPrimary),
+                  hintStyle: TextStyle(
+                      fontFamily: 'Cairo', color: Colors.grey.shade500),
+                  suffixIcon:
+                      const Icon(Icons.calendar_today, color: _kPrimary),
                   filled: true,
                   fillColor: fillColor,
                   border: OutlineInputBorder(
@@ -176,7 +265,7 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
                 ),
               ]),
 
-              // ── Image preview (الصورة الأصلية قبل الحفظ) ─────────────────
+              // ── Image preview ─────────────────────────────────────────────
               if (_imagePath != null) ...[
                 const SizedBox(height: 8),
                 Stack(
@@ -190,7 +279,6 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    // شارة "سيتم تشفيرها"
                     Positioned(
                       bottom: 6,
                       left: 6,
@@ -226,7 +314,7 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kPrimary,
+                    backgroundColor: _chequeType == 'CREDIT' ? _kGreen : _kRed,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
@@ -262,7 +350,8 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
         style: TextStyle(fontFamily: 'Cairo', color: textColor),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey.shade500),
+          hintStyle:
+              TextStyle(fontFamily: 'Cairo', color: Colors.grey.shade500),
           prefixText: prefix,
           prefixStyle: const TextStyle(color: _kPrimary, fontFamily: 'Cairo'),
           filled: true,
@@ -290,38 +379,74 @@ class _AddChequeSheetState extends State<AddChequeSheet> {
 
     setState(() => _saving = true);
     try {
-      // ✅ شفر الصورة قبل الحفظ
+      // ── تشفير الصورة ────────────────────────────────────────────────
       String? finalImagePath;
       if (_imagePath != null) {
-        finalImagePath = await ImageEncryptionService.instance
-            .encryptImage(_imagePath!);
+        finalImagePath =
+            await ImageEncryptionService.instance.encryptImage(_imagePath!);
       }
 
       final db = await DatabaseHelper.instance.database;
 
-      final creditId = await db.insert('credits', {
-        'clientId':       widget.clientId,
-        'montantTotal':   montant,
-        'montantRestant': montant,
-        'dateCredit':     DateTime.now().toIso8601String(),
-        'description':    _descCtrl.text.trim().isEmpty
-            ? '${Tr.s('cheque_prefix')}${_numeroCtrl.text.trim()}'
-            : _descCtrl.text.trim(),
-        'imagePath': finalImagePath,
-      });
+      if (_chequeType == 'PAYMENT') {
+        // ── أخذت — ينشئ credit جديد ──────────────────────────────────
+        final creditId = await db.insert('credits', {
+          'clientId': widget.clientId,
+          'montantTotal': montant,
+          'montantRestant': montant,
+          'dateCredit': DateTime.now().toIso8601String(),
+          'description': _descCtrl.text.trim().isEmpty
+              ? '${Tr.s('cheque_prefix')}${_numeroCtrl.text.trim()}'
+              : _descCtrl.text.trim(),
+          'imagePath': finalImagePath,
+        });
 
-      await db.insert('cheques', {
-        'creditId':     creditId,
-        'numero':       _numeroCtrl.text.trim(),
-        'montant':      montant,
-        'dateEcheance': _selectedDate!.toIso8601String(),
-        'banque':       _banqueCtrl.text.trim().isEmpty
-            ? null
-            : _banqueCtrl.text.trim(),
-        'imagePath':    finalImagePath,
-        'statut':       'EN_ATTENTE',
-        'dateCreation': DateTime.now().toIso8601String(),
-      });
+        await db.insert('cheques', {
+          'creditId': creditId,
+          'numero': _numeroCtrl.text.trim(),
+          'montant': montant,
+          'dateEcheance': _selectedDate!.toIso8601String(),
+          'banque':
+              _banqueCtrl.text.trim().isEmpty ? null : _banqueCtrl.text.trim(),
+          'imagePath': finalImagePath,
+          'statut': 'EN_ATTENTE',
+          'dateCreation': DateTime.now().toIso8601String(),
+        });
+      } else {
+        // ── أعطيت — ينشئ paiement FIFO + يربط الشيك بآخر credit ──────
+        await DatabaseHelper.instance.createPaiementFIFO(
+          widget.clientId,
+          montant,
+          note: _descCtrl.text.trim().isEmpty
+              ? '${Tr.s('cheque_prefix')}${_numeroCtrl.text.trim()}'
+              : _descCtrl.text.trim(),
+          imagePath: finalImagePath,
+        );
+
+        // ربط الشيك بآخر credit موجود
+        final credits = await db.query(
+          'credits',
+          where: 'clientId = ?',
+          whereArgs: [widget.clientId],
+          orderBy: 'dateCredit DESC',
+          limit: 1,
+        );
+        if (credits.isNotEmpty) {
+          final creditId = credits.first['id'] as int;
+          await db.insert('cheques', {
+            'creditId': creditId,
+            'numero': _numeroCtrl.text.trim(),
+            'montant': montant,
+            'dateEcheance': _selectedDate!.toIso8601String(),
+            'banque': _banqueCtrl.text.trim().isEmpty
+                ? null
+                : _banqueCtrl.text.trim(),
+            'imagePath': finalImagePath,
+            'statut': 'EN_ATTENTE',
+            'dateCreation': DateTime.now().toIso8601String(),
+          });
+        }
+      }
 
       await DatabaseHelper.instance.updateClientSolde(widget.clientId);
       widget.onSaved();
